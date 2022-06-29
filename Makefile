@@ -10,7 +10,7 @@ CFLAGS = -std=c++23 -g -O3 -Wall -Wextra -Wsystem-headers -isystem code
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS 	 	:= # -fopenmp -lm -lnoise
+LFLAGS 	 	:= -lm # -fopenmp  -lnoise
 LIBRARIES   := -L /usr/lib
 
 SRC_DIR 	:= ./code

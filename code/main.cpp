@@ -123,13 +123,12 @@ int main(int argc, char *argv[])
         {
             char rawBuffer = buf[i];
 
-            printf("%c", rawBuffer);
+            std::string theString = std::string(1, rawBuffer);
 
-            /* for (int j = 0; j < sizeof(rawBuffer); ++j)
-            {
-                char line = rawBuffer[j];
-                printf("%c", line);
-            } */
+            // Do something funky with the string
+            // theString.erase(std::remove(theString.begin(), theString.end(), '\n'), theString.end());
+
+            printf("%s", theString.c_str());
         }
 
         time_t rawtime;
