@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 #include <sys/time.h>
 #include <algorithm>
 #include <random>
@@ -17,12 +18,13 @@
 #define global_variable static
 
 // Program constants
-long int MemoryAllocatedCPU = 0L;
-const float PI = acos(-1);
+global_variable long int MemoryAllocatedCPU = 0L;
+global_variable const float PI = acos(-1);
 
-const char *portname = "/dev/ttyACM0";
+std::string portname = "/dev/ttyACM0";
 
-int set_interface_attribs(int fd, int speed, int parity)
+internal int
+set_interface_attribs(int fd, int speed, int parity)
 {
     struct termios tty;
     if (tcgetattr(fd, &tty) != 0)
@@ -61,7 +63,8 @@ int set_interface_attribs(int fd, int speed, int parity)
     return 0;
 }
 
-void set_blocking(int fd, int should_block)
+internal void
+set_blocking(int fd, int should_block)
 {
     struct termios tty;
     memset(&tty, 0, sizeof tty);
@@ -96,32 +99,44 @@ int main(int argc, char *argv[])
     }
 
     // Read data from the Arduinos Serial port in the Linux host
-    int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
+    // Let us try three ports lol
+    std::cout << "Using portname: " << portname << std::endl;
+
+    int fd = open(portname.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+
+    // std::cout << "    Using portname: " << portname << std::endl;
     if (fd < 0)
     {
-        printf("error %d opening %s: %s", errno, portname, strerror(errno));
+        // printf("error %d opening %s: %s", errno, portname, strerror(errno));
         return (1);
     }
 
-    int set_interface_attribs_result = set_interface_attribs(fd, B9600, 0); // set speed to 9600 bps, 8n1 (no parity)
-    printf("set_interface_attribs_result: %d", set_interface_attribs_result);
-    set_blocking(fd, 0); // set no blocking
+    set_interface_attribs(fd, B9600, 0); // set speed to 9600 bps, 8n1 (no parity)
+    set_blocking(fd, 0);                 // set no blocking
 
     // write(fd, "hello!\n", 7); // send 7 character greeting
 
     bool running = true;
-    unsigned long long int masterCount = 0;
 
     while (running)
     {
-        usleep((100) * 100);
-
         char buf[100];
-        int n = read(fd, buf, sizeof buf); // read up to 100 characters if ready to read
 
-        for (int i = 0; i < n; ++i)
+        usleep((1000) * sizeof buf);
+
+        int N = read(fd, buf, sizeof buf); // read up to 100 characters if ready to read
+
+        std::cout << buf << std::endl;
+
+        /* for (int i = 0; i < N; ++i)
         {
             char rawBuffer = buf[i];
+
+            // std::cout << "  [main loop]: i = " << i << std::endl;
+
+            std::cout << buf << std::endl;
+
+            // printf("%c", rawBuffer);
 
             std::string theString = std::string(1, rawBuffer);
 
@@ -129,20 +144,7 @@ int main(int argc, char *argv[])
             // theString.erase(std::remove(theString.begin(), theString.end(), '\n'), theString.end());
 
             printf("%s", theString.c_str());
-        }
-
-        time_t rawtime;
-        struct tm *timeinfo;
-
-        time(&rawtime);
-        timeinfo = localtime(&rawtime);
-
-        if (masterCount % 10 == 0)
-        {
-            printf("\nCurrent local time and date: %s\n", asctime(timeinfo));
-        }
-
-        ++masterCount;
+        } */
     }
 
     // Performance metrics
