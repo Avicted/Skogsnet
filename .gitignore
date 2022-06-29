@@ -1,0 +1,7 @@
+.vscode/
+build/
+result.out
+/**/*.o
+noise.pgm
+noise.png
+output.dat
