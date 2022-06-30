@@ -150,17 +150,16 @@ int main(int argc, char *argv[])
     }
 
     // Read data from the Arduinos Serial port in the Linux host
-    // Let us try three ports lol
-    std::cout << "        Using portname: " << portname << std::endl;
-    int fd;
+    // Let us try five ports lol
+    int fd; // file descriptor
+    unsigned int connectionAttempts = 0;
+    unsigned int maxConnectionAttempts = 5;
 
-    int connectionAttempts = 0;
-
-    while (connectionAttempts < 5)
+    while (connectionAttempts < maxConnectionAttempts)
     {
         std::string portnameString = portname + std::to_string(connectionAttempts);
 
-        std::cout << "portnameString: " << portnameString << std::endl;
+        std::cout << "      Trying port: " << portnameString << std::endl;
 
         fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
 
