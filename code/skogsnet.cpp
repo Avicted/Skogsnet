@@ -13,13 +13,14 @@
 #include <unistd.h>
 #include <signal.h>
 #include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 // Cpp spec does shenanigans with the usage of <static>
 #define internal static
 #define local_persist static
 #define global_variable static
 
-// Program constants
+// Program constants ------------------------------------------------
 global_variable long int MemoryAllocatedCPU = 0L;
 global_variable const float PI = acos(-1);
 
@@ -30,6 +31,7 @@ global_variable double time_start;
 global_variable bool running;
 
 std::string portname = "/dev/ttyACM";
+// ------------------------------------------------------------------
 
 struct Measurement
 {
@@ -96,7 +98,7 @@ set_blocking(int fd, int should_block)
         printf("error %d setting term attributes", errno);
 }
 
-/* internal std::string
+internal std::string
 get_time_now()
 {
     time_t t;
@@ -108,7 +110,7 @@ get_time_now()
     std::string dateTimeString(cTimeNow, size);
 
     return (dateTimeString);
-} */
+}
 
 internal void
 print_performance_metrics()
@@ -158,8 +160,9 @@ int main(int argc, char *argv[])
     while (connectionAttempts < maxConnectionAttempts)
     {
         std::string portnameString = portname + std::to_string(connectionAttempts);
+        MemoryAllocatedCPU += 1L * sizeof(portnameString);
 
-        std::cout << "      Trying port: " << portnameString << std::endl;
+        std::cout << "\n      Trying port: " << portnameString << std::endl;
 
         fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
 
@@ -180,31 +183,35 @@ int main(int argc, char *argv[])
         set_blocking(fd, 0);                   // set no blocking
     }
 
+    printf("        Skogsnet is running now\n");
+
     running = true;
-
-    printf("        Running now\n");
-
     while (running)
     {
-        char buffer[100] = {0};
-        int pos = 0;
+        unsigned int bufferSize = 100;
+        char buffer[bufferSize] = {0};
+        unsigned int pos = 0;
+
+        MemoryAllocatedCPU += 1L * bufferSize * sizeof(char);
 
         usleep(1000);
 
         while (read(fd, buffer + pos, 1))
         {
             if (buffer[pos] == '\n')
+            {
                 break;
+            }
 
-            pos++;
+            ++pos;
         }
 
         // JSON deserializer, parse explicitly
         try
         {
-            auto JSONResult = nlohmann::json::parse(buffer);
-            std::cout << JSONResult << std::endl;
-            // std::cout << buffer;
+            // auto JSONResult = json::parse(buffer);
+            // std::cout << std::setw(4) << JSONResult << std::endl;
+            std::cout << buffer;
         }
         catch (const std::exception &e)
         {

@@ -20,7 +20,7 @@ INCLUDES    := $(wildcard $(SRC_DIR)/*.hpp)
 OBJ_FILES   := $(SRC_FILES:.cpp=.o)
 
 # define the executable file 
-TARGET = main
+TARGET = skogsnet_v0.0.1
 
 #
 # The following part of the makefile is generic; it can be used to 
@@ -44,6 +44,7 @@ dirs:
 
 clean:	
 	rm -r build 2> /dev/null || true
+	rm -r code/*.o 2> /dev/null || true
 	
 run:
 	./build/$(TARGET)
