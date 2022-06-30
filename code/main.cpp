@@ -29,7 +29,7 @@ global_variable double time_start;
 
 global_variable bool running;
 
-std::string portname = "/dev/ttyACM2";
+std::string portname = "/dev/ttyACM";
 
 struct Measurement
 {
@@ -152,16 +152,34 @@ int main(int argc, char *argv[])
     // Read data from the Arduinos Serial port in the Linux host
     // Let us try three ports lol
     std::cout << "        Using portname: " << portname << std::endl;
+    int fd;
 
-    int fd = open(portname.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
-    if (fd < 0)
+    int connectionAttempts = 0;
+
+    while (connectionAttempts < 5)
     {
-        printf("error %d opening %s: %s", errno, portname.c_str(), strerror(errno));
-        return (1);
-    }
+        std::string portnameString = portname + std::to_string(connectionAttempts);
 
-    set_interface_attribs(fd, B115200, 0); // set speed to 115200 bps, 8n1 (no parity)
-    set_blocking(fd, 0);                   // set no blocking
+        std::cout << "portnameString: " << portnameString << std::endl;
+
+        fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+
+        if (fd < 0)
+        {
+            printf("error %d opening %s: %s", errno, portnameString.c_str(), strerror(errno));
+            ++connectionAttempts;
+
+            int secondsToSleep = 1;
+            sleep(secondsToSleep);
+
+            continue;
+        }
+
+        connectionAttempts = 1000;
+
+        set_interface_attribs(fd, B115200, 0); // set speed to 115200 bps, 8n1 (no parity)
+        set_blocking(fd, 0);                   // set no blocking
+    }
 
     running = true;
 
