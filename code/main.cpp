@@ -12,6 +12,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <signal.h>
+#include <nlohmann/json.hpp>
 
 // Cpp spec does shenanigans with the usage of <static>
 #define internal static
@@ -28,7 +29,7 @@ global_variable double time_start;
 
 global_variable bool running;
 
-std::string portname = "/dev/ttyACM0";
+std::string portname = "/dev/ttyACM2";
 
 struct Measurement
 {
@@ -168,31 +169,35 @@ int main(int argc, char *argv[])
 
     while (running)
     {
-        char buf[200];
+        char buffer[100] = {0};
+        int pos = 0;
 
-        usleep((1000) * sizeof buf);
+        usleep(1000);
 
-        read(fd, buf, sizeof buf); // read up to 100 characters if ready to read
-
-        std::cout << buf << std::endl;
-
-        /* for (int i = 0; i < N; ++i)
+        while (read(fd, buffer + pos, 1))
         {
-            char rawBuffer = buf[i];
+            if (buffer[pos] == '\n')
+                break;
 
-            // std::cout << "  [main loop]: i = " << i << std::endl;
+            pos++;
+        }
 
-            std::cout << buf << std::endl;
-
-            // printf("%c", rawBuffer);
-
-            std::string theString = std::string(1, rawBuffer);
-
-            // Do something funky with the string
-            // theString.erase(std::remove(theString.begin(), theString.end(), '\n'), theString.end());
-
-            printf("%s", theString.c_str());
-        } */
+        // JSON deserializer, parse explicitly
+        try
+        {
+            auto JSONResult = nlohmann::json::parse(buffer);
+            std::cout << JSONResult << std::endl;
+            // std::cout << buffer;
+        }
+        catch (const std::exception &e)
+        {
+            // std::cerr << "\n      ERROR: Could not parse the JSON from the serial message." << '\n';
+            // std::cerr << "         buffer: " << buffer << std::endl;
+        }
+        // Normally you would null-terminate string, but noticed I initialised the
+        // buffer to all zeroes at the beginning.  So this is not strictly necessary.
+        // However, in this case it will remove the newline character.
+        // buffer[pos] = 0;
     }
 
     print_performance_metrics();
