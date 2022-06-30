@@ -8,7 +8,7 @@
 #include "Arduino.h"
 #include "Wire.h"
 
-const int capacity = JSON_OBJECT_SIZE(2);
+const int capacity = JSON_OBJECT_SIZE(200);
 StaticJsonDocument<capacity> doc;
 
 // JsonObject temperature_celcius = doc.createNestedObject("temperature_celcius");
@@ -16,7 +16,7 @@ StaticJsonDocument<capacity> doc;
 
 void setup()
 {
-  Serial.begin(9600); // start serial for output
+  Serial.begin(115200); // start serial for output
   Serial.println("Slim bob! :)\n");
   
   TH02.begin();
@@ -39,5 +39,5 @@ void loop()
   
   serializeJson(doc, Serial);
 
-  delay(5000);
+  delay(1000);
 }

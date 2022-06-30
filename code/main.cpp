@@ -11,6 +11,7 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <signal.h>
 
 // Cpp spec does shenanigans with the usage of <static>
 #define internal static
@@ -21,7 +22,20 @@
 global_variable long int MemoryAllocatedCPU = 0L;
 global_variable const float PI = acos(-1);
 
+global_variable struct timeval _ttime;
+global_variable struct timezone _tzone;
+global_variable double time_start;
+
+global_variable bool running;
+
 std::string portname = "/dev/ttyACM0";
+
+struct Measurement
+{
+    std::string DateTime;
+    float TemperatureCelcius;
+    float Humidity;
+};
 
 internal int
 set_interface_attribs(int fd, int speed, int parity)
@@ -81,13 +95,49 @@ set_blocking(int fd, int should_block)
         printf("error %d setting term attributes", errno);
 }
 
+/* internal std::string
+get_time_now()
+{
+    time_t t;
+    time(&t);
+
+    // Current datetime from char* to std::string
+    char *cTimeNow = ctime(&t);
+    int size = sizeof(cTimeNow);
+    std::string dateTimeString(cTimeNow, size);
+
+    return (dateTimeString);
+} */
+
+internal void
+print_performance_metrics()
+{
+    printf("\n        [Performance Metrics]\n");
+    printf("        Total memory allocated \t\t = %.1lf MB\n", MemoryAllocatedCPU / 1000000.0);
+    gettimeofday(&_ttime, &_tzone);
+    double time_end = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+
+    printf("        Current Wall clock run time \t = %.1lf secs\n", time_end - time_start);
+}
+
+internal void
+intHandler(int dummy)
+{
+    running = false;
+    printf("\n        dummy: %d\n", dummy);
+    printf("        Exiting successfully.\n");
+}
+
 int main(int argc, char *argv[])
 {
+    printf("        Settings up time measurement and serial communications...\n");
+
     // Time measurement
-    struct timeval _ttime;
-    struct timezone _tzone;
     gettimeofday(&_ttime, &_tzone);
-    double time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+    time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+
+    // Signals
+    signal(SIGINT, intHandler);
 
     // Unused input arguments
     if (argc > 0)
@@ -100,31 +150,29 @@ int main(int argc, char *argv[])
 
     // Read data from the Arduinos Serial port in the Linux host
     // Let us try three ports lol
-    std::cout << "Using portname: " << portname << std::endl;
+    std::cout << "        Using portname: " << portname << std::endl;
 
     int fd = open(portname.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
-
-    // std::cout << "    Using portname: " << portname << std::endl;
     if (fd < 0)
     {
-        // printf("error %d opening %s: %s", errno, portname, strerror(errno));
+        printf("error %d opening %s: %s", errno, portname.c_str(), strerror(errno));
         return (1);
     }
 
-    set_interface_attribs(fd, B9600, 0); // set speed to 9600 bps, 8n1 (no parity)
-    set_blocking(fd, 0);                 // set no blocking
+    set_interface_attribs(fd, B115200, 0); // set speed to 115200 bps, 8n1 (no parity)
+    set_blocking(fd, 0);                   // set no blocking
 
-    // write(fd, "hello!\n", 7); // send 7 character greeting
+    running = true;
 
-    bool running = true;
+    printf("        Running now\n");
 
     while (running)
     {
-        char buf[100];
+        char buf[200];
 
         usleep((1000) * sizeof buf);
 
-        int N = read(fd, buf, sizeof buf); // read up to 100 characters if ready to read
+        read(fd, buf, sizeof buf); // read up to 100 characters if ready to read
 
         std::cout << buf << std::endl;
 
@@ -147,12 +195,7 @@ int main(int argc, char *argv[])
         } */
     }
 
-    // Performance metrics
-    printf("   Total memory allocated = %.1lf MB\n", MemoryAllocatedCPU / 1000000.0);
-    gettimeofday(&_ttime, &_tzone);
-    double time_end = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
-
-    printf("   Wall clock run time    = %.1lf secs\n", time_end - time_start);
+    print_performance_metrics();
 
     return (0);
 }
