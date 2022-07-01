@@ -5,13 +5,14 @@
 CC = g++
 
 # define any compile-time flags
-CFLAGS = -std=c++23 -g -O3 -Wall -Wextra -Wsystem-headers -isystem code
+CPPFLAGS = -std=c++23 -g -Ofast -Wall -Wextra -Wsystem-headers -isystem code
+CPPFLAGS += -I/usr/include
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LFLAGS 	 	:= -lm # -fopenmp  -lnoise
-LIBRARIES   := -L /usr/lib
+LDFLAGS 	 	:= -lm -fopenmp
+LDLIBS   		:= -L /usr/lib
 
 SRC_DIR 	:= ./code
 OBJ_DIR 	:= ./build
@@ -38,7 +39,7 @@ all: clean dirs $(TARGET)
 $(TARGET): $(OBJ_FILES)
 	@echo
 	@echo        Building the program
-	$(CC) $(CFLAGS) -o ./build/$(TARGET) $(SRC_FILES) $(LFLAGS) $(LIBRARIES)
+	$(CC) $(CPPFLAGS) -o ./build/$(TARGET) $(SRC_FILES) $(LDLIBS) $(LDFLAGS)
 	./build/$(TARGET)
 	mv ./code/*.o ./build/
 

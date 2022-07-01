@@ -12,7 +12,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <signal.h>
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 using json = nlohmann::json;
 
 // Cpp spec does shenanigans with the usage of <static>
@@ -192,22 +192,29 @@ int main(int argc, char *argv[])
             ++pos;
         }
 
+        if (strlen(buffer) == 0)
+        {
+            continue;
+        }
+
+        std::cout << "        buffer: " << buffer << std::endl;
+
         // JSON deserializer, parse explicitly
         try
         {
-            // auto JSONResult = json::parse(buffer);
-            // std::cout << std::setw(4) << JSONResult << std::endl;
-            std::cout << buffer;
+            // fill a stream with JSON text
+            std::stringstream ss;
+            ss << buffer;
+
+            // parse and serialize JSON
+            json j_complete = json::parse(ss);
+            std::cout << std::setw(4) << j_complete << "\n\n";
         }
-        catch (const std::exception &e)
+        catch (json::exception &e)
         {
             // std::cerr << "\n      ERROR: Could not parse the JSON from the serial message." << '\n';
-            // std::cerr << "         buffer: " << buffer << std::endl;
+            // std::cerr << e.what() << std::endl;
         }
-        // Normally you would null-terminate string, but noticed I initialised the
-        // buffer to all zeroes at the beginning.  So this is not strictly necessary.
-        // However, in this case it will remove the newline character.
-        // buffer[pos] = 0;
     }
 
     print_performance_metrics();
