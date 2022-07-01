@@ -174,14 +174,15 @@ int main(int argc, char *argv[])
     running = true;
     while (running)
     {
-        unsigned int bufferSize = 100;
+        unsigned int bufferSize = 256;
         char buffer[bufferSize] = {0};
         unsigned int pos = 0;
 
         MemoryAllocatedCPU += 1L * bufferSize * sizeof(char);
 
-        usleep(1000);
+        usleep(10000);
 
+        // Read 1 byte at a time from the serial port
         while (read(fd, buffer + pos, 1))
         {
             if (buffer[pos] == '\n')
@@ -192,6 +193,7 @@ int main(int argc, char *argv[])
             ++pos;
         }
 
+        // Check for an empty buffer
         if (strlen(buffer) == 0)
         {
             continue;
@@ -199,7 +201,7 @@ int main(int argc, char *argv[])
 
         std::cout << "        buffer: " << buffer << std::endl;
 
-        // JSON deserializer, parse explicitly
+        // JSON deserializer
         try
         {
             // fill a stream with JSON text
@@ -212,8 +214,8 @@ int main(int argc, char *argv[])
         }
         catch (json::exception &e)
         {
-            // std::cerr << "\n      ERROR: Could not parse the JSON from the serial message." << '\n';
-            // std::cerr << e.what() << std::endl;
+            std::cerr << "\n      ERROR: Could not parse the JSON from the serial message." << '\n';
+            std::cerr << e.what() << std::endl;
         }
     }
 
