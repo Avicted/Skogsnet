@@ -38,6 +38,13 @@ struct Measurement
     std::string DateTime;
     float TemperatureCelcius;
     float Humidity;
+
+    void print()
+    {
+        printf("\n        Measurement:\n");
+        printf("        TemperatureCelcius:\t%f\n", TemperatureCelcius);
+        printf("        Humidity:\t\t%f\n", Humidity);
+    }
 };
 
 internal int
@@ -211,6 +218,37 @@ int main(int argc, char *argv[])
             // parse and serialize JSON
             json j_complete = json::parse(ss);
             std::cout << std::setw(4) << j_complete << "\n\n";
+
+            auto t = std::time(nullptr);
+            auto tm = *std::localtime(&t);
+
+            std::ostringstream oss;
+            oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+            std::string dateTimeNow = oss.str();
+
+            Measurement newMeasurement;
+            newMeasurement.DateTime = dateTimeNow;
+            newMeasurement.TemperatureCelcius = 0.0f;
+            newMeasurement.Humidity = 0.0f;
+
+            // special iterator member functions for objects
+            for (json::iterator it = j_complete.begin(); it != j_complete.end(); ++it)
+            {
+                // std::cout << it.key() << " : " << it.value() << "\n";
+
+                if (it.key() == "temperature_celcius")
+                {
+                    newMeasurement.TemperatureCelcius = it.value();
+                }
+                if (it.key() == "humidity")
+                {
+                    newMeasurement.Humidity = it.value();
+                }
+            }
+
+            // @Note(Victor): the newMeasurement members are now populated
+            // Use the Measurement to act on actuators based on some logic for example.
+            newMeasurement.print();
         }
         catch (json::exception &e)
         {
