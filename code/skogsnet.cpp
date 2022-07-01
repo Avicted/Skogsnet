@@ -14,6 +14,7 @@
 #include <signal.h>
 #include "json.hpp"
 using json = nlohmann::json;
+#include "PID.hpp"
 
 // Cpp spec does shenanigans with the usage of <static>
 #define internal static
@@ -29,6 +30,8 @@ global_variable struct timezone _tzone;
 global_variable double time_start;
 
 global_variable bool running;
+
+global_variable PID PIDController;
 
 std::string portname = "/dev/ttyACM";
 // ------------------------------------------------------------------
@@ -136,6 +139,9 @@ int main(int argc, char *argv[])
     // Signals
     signal(SIGINT, intHandler);
 
+    // PID controller initialization
+    PIDController.initialize();
+
     // Unused input arguments
     if (argc > 0)
     {
@@ -155,6 +161,8 @@ int main(int argc, char *argv[])
     while (connectionAttempts < maxConnectionAttempts)
     {
         MemoryAllocatedCPU += 1L * sizeof(portnameString);
+
+        portnameString = portname + std::to_string(connectionAttempts);
 
         std::cout << "\n      Trying port: " << portnameString << std::endl;
 
@@ -177,7 +185,7 @@ int main(int argc, char *argv[])
         set_blocking(fd, 0);                   // set no blocking
     }
 
-    printf("        Skogsnet is running now, connected to port: %s\n\n", portnameString.c_str());
+    printf("\n        Skogsnet is running now, connected to port: %s\n\n", portnameString.c_str());
 
     running = true;
     while (running)
@@ -193,6 +201,10 @@ int main(int argc, char *argv[])
         // Read 1 byte at a time from the serial port
         while (read(fd, buffer + pos, 1))
         {
+            if (pos >= bufferSize)
+            {
+                continue;
+            }
             if (buffer[pos] == '\n')
             {
                 break;
