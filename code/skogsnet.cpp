@@ -35,13 +35,14 @@ std::string portname = "/dev/ttyACM";
 
 struct Measurement
 {
-    std::string DateTime;
+    std::string Timestamp;
     float TemperatureCelcius;
     float Humidity;
 
     void print()
     {
         printf("\n        Measurement:\n");
+        printf("        Timestamp:\t\t%s\n", Timestamp.c_str());
         printf("        TemperatureCelcius:\t%f\n", TemperatureCelcius);
         printf("        Humidity:\t\t%f\n", Humidity);
     }
@@ -223,11 +224,11 @@ int main(int argc, char *argv[])
             auto tm = *std::localtime(&t);
 
             std::ostringstream oss;
-            oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+            oss << std::put_time(&tm, "%d.%m.%Y %T");
             std::string dateTimeNow = oss.str();
 
             Measurement newMeasurement;
-            newMeasurement.DateTime = dateTimeNow;
+            newMeasurement.Timestamp = dateTimeNow;
             newMeasurement.TemperatureCelcius = 0.0f;
             newMeasurement.Humidity = 0.0f;
 
