@@ -5,7 +5,7 @@
 CC = g++
 
 # define any compile-time flags
-CPPFLAGS = -std=c++23 -g -Ofast -isystem code
+CPPFLAGS = -std=c++23 -g -Ofast -Wall -Wextra -Wsystem-headers -isystem code
 CPPFLAGS += -I/usr/include
 
 # define library paths in addition to /usr/lib
