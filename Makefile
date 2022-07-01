@@ -32,21 +32,30 @@ TARGET = skogsnet_v0.0.1
 
 
 all: clean dirs $(TARGET)
-	@echo  The Serial Temperature and Humidity reader program has been built and runned successfully!
+	@echo
+	@echo        The Serial Temperature and Humidity reader program has been built and runned successfully!
 
 $(TARGET): $(OBJ_FILES)
+	@echo
+	@echo        Building the program
 	$(CC) $(CFLAGS) -o ./build/$(TARGET) $(SRC_FILES) $(LFLAGS) $(LIBRARIES)
 	./build/$(TARGET)
 	mv ./code/*.o ./build/
 
 dirs:
+	@echo
+	@echo        Creating directories
 	mkdir -p build
 
-clean:	
+clean:
+	@echo
+	@echo        Cleaning
 	rm -r build 2> /dev/null || true
 	rm -r code/*.o 2> /dev/null || true
 	
 run:
+	@echo
+	@echo        Running the executable
 	./build/$(TARGET)
 
 depend: $(SRC_FILES)

@@ -98,20 +98,6 @@ set_blocking(int fd, int should_block)
         printf("error %d setting term attributes", errno);
 }
 
-/* internal std::string
-get_time_now()
-{
-    time_t t;
-    time(&t);
-
-    // Current datetime from char* to std::string
-    char *cTimeNow = ctime(&t);
-    int size = sizeof(cTimeNow);
-    std::string dateTimeString(cTimeNow, size);
-
-    return (dateTimeString);
-} */
-
 internal void
 print_performance_metrics()
 {
