@@ -139,13 +139,13 @@ int main(int argc, char *argv[])
 
     // Read data from the Arduinos Serial port in the Linux host
     // Let us try five ports lol
-    int fd; // file descriptor
     unsigned int connectionAttempts = 0;
     unsigned int maxConnectionAttempts = 5;
+    std::string portnameString = portname + std::to_string(connectionAttempts);
+    int fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC); // file descriptor
 
     while (connectionAttempts < maxConnectionAttempts)
     {
-        std::string portnameString = portname + std::to_string(connectionAttempts);
         MemoryAllocatedCPU += 1L * sizeof(portnameString);
 
         std::cout << "\n      Trying port: " << portnameString << std::endl;
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
         set_blocking(fd, 0);                   // set no blocking
     }
 
-    printf("        Skogsnet is running now\n");
+    printf("        Skogsnet is running now, connected to port: %s\n\n", portnameString.c_str());
 
     running = true;
     while (running)
