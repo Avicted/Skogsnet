@@ -31,21 +31,19 @@ logic, a PID regulator implementation perhaps.
 
         Skogsnet is running now, connected to port: /dev/ttyACM0
 
-        buffer: {"temperature_celcius":28.125,"humidity":63.5625}
-
 {
-    "humidity": 63.5625,
-    "temperature_celcius": 28.125
+    "humidity": 63.75,
+    "temperature_celcius": 28.0625
 }
 
 
         Measurement:
-        Timestamp:		02.07.2022 13:14:11
-        TemperatureCelcius:	28.125000
-        Humidity:		63.562500
-Time (s)	System Output	ControllerOutput
-t: 0.999999	measurement: 28.125000	pid.out: -10.000000
-        buffer: {"temperature_celcius":28.125,"humidity":63.625}
+        Timestamp:              02.07.2022 13:33:15
+        TemperatureCelcius:     28.062500
+        Humidity:               63.750000
+
+Time (s)        System Output           ControllerOutput        CorrectedOutput
+t: 0.999999     measurement: 28.062500  pid.out: -10.000000     correctedOutput: -9.402489
 
 ```
 
