@@ -300,6 +300,7 @@ int main(int argc, char *argv[])
     running = true;
     while (running)
     {
+        // Read data ---------------------------------------------------
         unsigned int bufferSize = 256;
         char buffer[bufferSize] = {0};
         unsigned int pos = 0;
@@ -329,9 +330,10 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        // Deserialize data -----------------------------------------------
         Measurement newMeasurement = deserializeJSON(buffer);
 
-        // Time measurement
+        // PID control the based on the data ------------------------------
         gettimeofday(&_ttime, &_tzone);
         double pid_time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
 
@@ -340,7 +342,6 @@ int main(int argc, char *argv[])
 
         for (float t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
         {
-
             // Get measurement from system
             float correctedOutput = TestSystem_Update(pid.out);
 
