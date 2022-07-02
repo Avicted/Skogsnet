@@ -154,32 +154,67 @@ intHandler(int dummy)
     printf("        Exiting successfully.\n");
 }
 
-int main(int argc, char *argv[])
+Measurement
+deserializeJSON(char *buffer)
 {
-    printf("        Settings up time measurement and serial communications...\n");
+    Measurement newMeasurement;
 
-    // Time measurement
-    gettimeofday(&_ttime, &_tzone);
-    time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
-
-    // Signals
-    signal(SIGINT, intHandler);
-
-    // Unused input arguments
-    if (argc > 0)
+    // JSON deserializer
+    try
     {
-        for (int i = 0; i < argc; ++i)
+        // fill a stream with JSON text
+        std::stringstream ss;
+        ss << buffer;
+
+        // parse and serialize JSON
+        json j_complete = json::parse(ss);
+        std::cout << std::setw(4) << j_complete << "\n\n";
+
+        auto t = std::time(nullptr);
+        auto tm = *std::localtime(&t);
+
+        std::ostringstream oss;
+        oss << std::put_time(&tm, "%d.%m.%Y %T");
+        std::string dateTimeNow = oss.str();
+
+        newMeasurement.Timestamp = dateTimeNow;
+        newMeasurement.TemperatureCelcius = 0.0f;
+        newMeasurement.Humidity = 0.0f;
+
+        // special iterator member functions for objects
+        for (json::iterator it = j_complete.begin(); it != j_complete.end(); ++it)
         {
-            printf("%s\n", argv[i]);
+            // std::cout << it.key() << " : " << it.value() << "\n";
+
+            if (it.key() == "temperature_celcius")
+            {
+                newMeasurement.TemperatureCelcius = it.value();
+            }
+            if (it.key() == "humidity")
+            {
+                newMeasurement.Humidity = it.value();
+            }
         }
+
+        // @Note(Victor): the newMeasurement members are now populated
+        // Use the Measurement to act on actuators based on some logic for example.
+        newMeasurement.print();
+    }
+    catch (json::exception &e)
+    {
+        std::cerr << "\n      ERROR: Could not parse the JSON from the serial message." << '\n';
+        std::cerr << e.what() << std::endl;
     }
 
+    return (newMeasurement);
+}
+
+void initializeSerialCommunication(int fd, unsigned int connectionAttempts, unsigned int maxConnectionAttempts)
+{
     // Read data from the Arduinos Serial port in the Linux host
     // Let us try five ports lol
-    unsigned int connectionAttempts = 0;
-    unsigned int maxConnectionAttempts = 5;
     std::string portnameString = portname + std::to_string(connectionAttempts);
-    int fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC); // file descriptor
+    fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC); // file descriptor
 
     while (connectionAttempts < maxConnectionAttempts)
     {
@@ -209,6 +244,36 @@ int main(int argc, char *argv[])
     }
 
     printf("\n        Skogsnet is running now, connected to port: %s\n\n", portnameString.c_str());
+}
+
+int main(int argc, char *argv[])
+{
+    printf("        Settings up time measurement and serial communications...\n");
+
+    // Time measurement
+    gettimeofday(&_ttime, &_tzone);
+    time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+
+    // Signals
+    signal(SIGINT, intHandler);
+
+    // Unused input arguments
+    if (argc > 0)
+    {
+        for (int i = 0; i < argc; ++i)
+        {
+            printf("%s\n", argv[i]);
+        }
+    }
+
+    // Read data from the Arduinos Serial port in the Linux host
+    // Let us try five ports lol
+    unsigned int connectionAttempts = 0;
+    unsigned int maxConnectionAttempts = 5;
+    std::string portnameString = portname + std::to_string(connectionAttempts);
+    int fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC); // file descriptor
+
+    initializeSerialCommunication(fd, connectionAttempts, maxConnectionAttempts);
 
     // Initialise PID controller
     PIDController pid = {
@@ -225,9 +290,10 @@ int main(int argc, char *argv[])
 
     PIDControllerInitialize(&pid);
 
-    /* Simulate response using test system */
-    float setpoint = 1.0f;
+    // Simulate response using test system
+    float setpoint = 20.0f;
 
+    // Main loop
     running = true;
     while (running)
     {
@@ -260,70 +326,22 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        std::cout << "        buffer: " << buffer << std::endl;
+        Measurement newMeasurement = deserializeJSON(buffer);
 
-        // JSON deserializer
-        try
+        printf("\nTime (s)\tSystem Output\t\tControllerOutput\tCorrectedOutput\r\n");
+        for (float t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
         {
-            // fill a stream with JSON text
-            std::stringstream ss;
-            ss << buffer;
 
-            // parse and serialize JSON
-            json j_complete = json::parse(ss);
-            std::cout << std::setw(4) << j_complete << "\n\n";
+            // Get measurement from system
+            float correctedOutput = TestSystem_Update(pid.out);
 
-            auto t = std::time(nullptr);
-            auto tm = *std::localtime(&t);
+            // Compute new control signal
+            PIDControllerUpdate(&pid, setpoint, newMeasurement.TemperatureCelcius);
 
-            std::ostringstream oss;
-            oss << std::put_time(&tm, "%d.%m.%Y %T");
-            std::string dateTimeNow = oss.str();
-
-            Measurement newMeasurement;
-            newMeasurement.Timestamp = dateTimeNow;
-            newMeasurement.TemperatureCelcius = 0.0f;
-            newMeasurement.Humidity = 0.0f;
-
-            // special iterator member functions for objects
-            for (json::iterator it = j_complete.begin(); it != j_complete.end(); ++it)
+            if (t > 0.99f)
             {
-                // std::cout << it.key() << " : " << it.value() << "\n";
-
-                if (it.key() == "temperature_celcius")
-                {
-                    newMeasurement.TemperatureCelcius = it.value();
-                }
-                if (it.key() == "humidity")
-                {
-                    newMeasurement.Humidity = it.value();
-                }
+                printf("t: %f\tmeasurement: %f\tpid.out: %f\tcorrectedOutput: %f\r\n", t, newMeasurement.TemperatureCelcius, pid.out, correctedOutput);
             }
-
-            // @Note(Victor): the newMeasurement members are now populated
-            // Use the Measurement to act on actuators based on some logic for example.
-            newMeasurement.print();
-
-            printf("Time (s)\tSystem Output\tControllerOutput\r\n");
-            for (float t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
-            {
-
-                // Get measurement from system
-                // float measurement = TestSystem_Update(pid.out);
-
-                // Compute new control signal
-                PIDControllerUpdate(&pid, setpoint, newMeasurement.TemperatureCelcius);
-
-                if (t > 0.99f)
-                {
-                    printf("t: %f\tmeasurement: %f\tpid.out: %f\r\n", t, newMeasurement.TemperatureCelcius, pid.out);
-                }
-            }
-        }
-        catch (json::exception &e)
-        {
-            std::cerr << "\n      ERROR: Could not parse the JSON from the serial message." << '\n';
-            std::cerr << e.what() << std::endl;
         }
     }
 
