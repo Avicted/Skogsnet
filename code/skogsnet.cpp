@@ -52,7 +52,8 @@ std::string portname = "/dev/ttyACM";
 #define SIMULATION_TIME_MAX 1.0f
 // ------------------------------------------------------------------
 
-float TestSystem_Update(float inp)
+internal float
+TestSystem_Update(float inp)
 {
     static float output = 0.0f;
     static const float alpha = 0.02f;
@@ -154,7 +155,7 @@ intHandler(int dummy)
     printf("        Exiting successfully.\n");
 }
 
-Measurement
+internal Measurement
 deserializeJSON(char *buffer)
 {
     Measurement newMeasurement;
@@ -209,7 +210,8 @@ deserializeJSON(char *buffer)
     return (newMeasurement);
 }
 
-void initializeSerialCommunication(int fd, unsigned int connectionAttempts, unsigned int maxConnectionAttempts)
+internal void
+initializeSerialCommunication(int fd, unsigned int connectionAttempts, unsigned int maxConnectionAttempts)
 {
     // Read data from the Arduinos Serial port in the Linux host
     // Let us try five ports lol
