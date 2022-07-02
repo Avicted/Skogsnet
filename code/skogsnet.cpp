@@ -31,10 +31,36 @@ global_variable double time_start;
 
 global_variable bool running;
 
-global_variable PID PIDController;
-
 std::string portname = "/dev/ttyACM";
+
+// Controller parameters
+#define PID_KP 2.0f
+#define PID_KI 0.5f
+#define PID_KD 0.25f
+
+#define PID_TAU 0.02f
+
+#define PID_LIM_MIN -10.0f
+#define PID_LIM_MAX 10.0f
+
+#define PID_LIM_MIN_INT -5.0f
+#define PID_LIM_MAX_INT 5.0f
+
+#define SAMPLE_TIME_S 0.01f
+
+// Maximum run-time of simulation
+#define SIMULATION_TIME_MAX 1.0f
 // ------------------------------------------------------------------
+
+float TestSystem_Update(float inp)
+{
+    static float output = 0.0f;
+    static const float alpha = 0.02f;
+
+    output = (SAMPLE_TIME_S * inp + output) / (1.0f + alpha * SAMPLE_TIME_S);
+
+    return output;
+}
 
 struct Measurement
 {
@@ -139,9 +165,6 @@ int main(int argc, char *argv[])
     // Signals
     signal(SIGINT, intHandler);
 
-    // PID controller initialization
-    PIDController.initialize();
-
     // Unused input arguments
     if (argc > 0)
     {
@@ -186,6 +209,24 @@ int main(int argc, char *argv[])
     }
 
     printf("\n        Skogsnet is running now, connected to port: %s\n\n", portnameString.c_str());
+
+    // Initialise PID controller
+    PIDController pid = {
+        PID_KP,
+        PID_KI,
+        PID_KD,
+        PID_TAU,
+        PID_LIM_MIN,
+        PID_LIM_MAX,
+        PID_LIM_MIN_INT,
+        PID_LIM_MAX_INT,
+        SAMPLE_TIME_S,
+    };
+
+    PIDControllerInitialize(&pid);
+
+    /* Simulate response using test system */
+    float setpoint = 1.0f;
 
     running = true;
     while (running)
@@ -262,6 +303,22 @@ int main(int argc, char *argv[])
             // @Note(Victor): the newMeasurement members are now populated
             // Use the Measurement to act on actuators based on some logic for example.
             newMeasurement.print();
+
+            printf("Time (s)\tSystem Output\tControllerOutput\r\n");
+            for (float t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
+            {
+
+                // Get measurement from system
+                // float measurement = TestSystem_Update(pid.out);
+
+                // Compute new control signal
+                PIDControllerUpdate(&pid, setpoint, newMeasurement.TemperatureCelcius);
+
+                if (t > 0.99f)
+                {
+                    printf("t: %f\tmeasurement: %f\tpid.out: %f\r\n", t, newMeasurement.TemperatureCelcius, pid.out);
+                }
+            }
         }
         catch (json::exception &e)
         {

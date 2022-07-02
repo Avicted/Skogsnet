@@ -1,46 +1,36 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sys/time.h>
-#include <algorithm>
-#include <random>
-#include <climits>
-#include <errno.h>
-#include <fcntl.h>
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
-#include <signal.h>
-#include "json.hpp"
-using json = nlohmann::json;
-
 #pragma once
 
-struct PID
+typedef struct
 {
-    double Kp;       // Proportional
-    double Ki;       // Integral
-    double Kd;       // Derivative
-    double setPoint; // What we want the input to be
+    // Controller gains
+    float Kp;
+    float Ki;
+    float Kd;
 
-    double processValue;    // Input to the PID-controller
-    double correctedOutput; // Output from the PID-controller
+    // Derivative low-pass filter time constant
+    float tau;
 
-    void initialize()
-    {
-        Kp = 0.0;
-        Ki = 0.0;
-        Kd = 0.0;
+    // Output limits
+    float limMin;
+    float limMax;
 
-        setPoint = 0.0;
+    // Integrator limits
+    float limMinInt;
+    float limMaxInt;
 
-        processValue = 0.0;
-        correctedOutput = 0.0;
-    }
+    // Sample time (in seconds)
+    float T;
 
-    void update()
-    {
-        printf("        Update\n");
-    }
-};
+    // Controller "memory"
+    float integrator;
+    float prevError; // Required for integrator
+    float differentiator;
+    float prevMeasurement; // Required for differentiator
+
+    // Controller output
+    float out;
+
+} PIDController;
+
+void PIDControllerInitialize(PIDController *pid);
+float PIDControllerUpdate(PIDController *pid, float setpoint, float measurement);
