@@ -19,17 +19,23 @@ This data can then be used as inputs to some <br>
 logic, a PID regulator implementation perhaps.
 
 <br>
+<br>
 
-## Example Output
+## Example
 
-```bash
-./build/skogsnet_v0.0.1
-        Settings up time measurement and serial communications...
-./build/skogsnet_v0.0.1
+```console
+user@system:~# ./build/skogsnet_v0.0.1
+Settings up time measurement and serial communications...
+```
 
-      Trying port: /dev/ttyACM0
+```console
+user@system:~# ./build/skogsnet_v0.0.1
 
-        Skogsnet is running now, connected to port: /dev/ttyACM0
+Trying port: /dev/ttyACM0
+
+Skogsnet is running now, connected to port: /dev/ttyACM0
+
+buffer: {"temperature_celcius":28.125,"humidity":63.5625}
 
 {
     "humidity": 63.75,
@@ -46,6 +52,9 @@ Time (s)        System Output           ControllerOutput        CorrectedOutput
 t: 0.999999     measurement: 28.062500  pid.out: -10.000000     correctedOutput: -9.402489
 
 ```
+
+<br>
+<br>
 
 ## Dependencies
 
