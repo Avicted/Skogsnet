@@ -16,7 +16,8 @@
 using json = nlohmann::json;
 #include "PID.hpp"
 
-// Cpp spec does shenanigans with the usage of <static>
+// Cpp spec does shenanigans with the usage of <static>, let's be explicit in what
+// we mean with 'static'
 #define internal static
 #define local_persist static
 #define global_variable static
@@ -28,6 +29,7 @@ global_variable const float PI = acos(-1);
 global_variable struct timeval _ttime;
 global_variable struct timezone _tzone;
 global_variable double time_start;
+global_variable double program_time_start;
 
 global_variable bool running;
 
@@ -46,14 +48,13 @@ std::string portname = "/dev/ttyACM";
 #define PID_LIM_MIN_INT -5.0f
 #define PID_LIM_MAX_INT 5.0f
 
-#define SAMPLE_TIME_S 0.01f
+#define SAMPLE_TIME_S 0.0000001
 
 // Maximum run-time of simulation
-#define SIMULATION_TIME_MAX 1.0f
+#define SIMULATION_TIME_MAX 1.0
 // ------------------------------------------------------------------
 
-internal float
-TestSystem_Update(float inp)
+internal float TestSystem_Update(float inp)
 {
     static float output = 0.0f;
     static const float alpha = 0.02f;
@@ -144,7 +145,7 @@ print_performance_metrics()
     gettimeofday(&_ttime, &_tzone);
     double time_end = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
 
-    printf("        Current Wall clock run time \t = %.1lf secs\n", time_end - time_start);
+    printf("        Current Wall clock run time \t = %.1lf secs\n", time_end - program_time_start);
 }
 
 internal void
@@ -254,7 +255,7 @@ int main(int argc, char *argv[])
 
     // Time measurement
     gettimeofday(&_ttime, &_tzone);
-    time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+    program_time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
 
     // Signals
     signal(SIGINT, intHandler);
@@ -330,7 +331,13 @@ int main(int argc, char *argv[])
 
         Measurement newMeasurement = deserializeJSON(buffer);
 
-        printf("\nTime (s)\tSystem Output\t\tControllerOutput\tCorrectedOutput\r\n");
+        // Time measurement
+        gettimeofday(&_ttime, &_tzone);
+        double pid_time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+
+        printf("\n        Time (s)\tSystem Output\t\tControllerOutput\tCorrectedOutput\r\n");
+        unsigned long int steps = 0;
+
         for (float t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
         {
 
@@ -340,11 +347,29 @@ int main(int argc, char *argv[])
             // Compute new control signal
             PIDControllerUpdate(&pid, setpoint, newMeasurement.TemperatureCelcius);
 
-            if (t > 0.99f)
+            if (t == 0)
             {
-                printf("t: %f\tmeasurement: %f\tpid.out: %f\tcorrectedOutput: %f\r\n", t, newMeasurement.TemperatureCelcius, pid.out, correctedOutput);
+                printf("        t: %f\tmeasurement: %f\tpid.out: %f\tcorrectedOutput: %f\r\n", t, newMeasurement.TemperatureCelcius, pid.out, correctedOutput);
             }
+
+            gettimeofday(&_ttime, &_tzone);
+            double time_end = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+            if (pid_time_start - time_end >= 1.0)
+            {
+                printf("        Warning: PID computation took too long time_end: %lf!\n", pid_time_start - time_end);
+                printf("        t: %f\n", t);
+                break;
+            }
+
+            ++steps;
         }
+
+        gettimeofday(&_ttime, &_tzone);
+        double time_end = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+
+        unsigned long int totalSteps = (double)SIMULATION_TIME_MAX / (double)SAMPLE_TIME_S;
+        printf("\n        Simulated %ld steps out of %ld total steps\n", steps, totalSteps);
+        printf("        PID computation run time = %.1lf secs out of our time budget: %f\n", (time_end - pid_time_start), SIMULATION_TIME_MAX);
     }
 
     print_performance_metrics();
