@@ -4,13 +4,16 @@
 #include <iostream>
 #include <sys/time.h>
 #include <algorithm>
+#include <fstream>
 #include <random>
 #include <climits>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#include <ctime>
 #include <termios.h>
 #include <unistd.h>
+#include <chrono>
 #include <signal.h>
 #include "json.hpp"
 using json = nlohmann::json;
@@ -28,7 +31,6 @@ global_variable const float PI = acos(-1);
 
 global_variable struct timeval _ttime;
 global_variable struct timezone _tzone;
-global_variable double time_start;
 global_variable double program_time_start;
 
 global_variable bool running;
@@ -48,13 +50,13 @@ std::string portname = "/dev/ttyACM";
 #define PID_LIM_MIN_INT -5.0f
 #define PID_LIM_MAX_INT 5.0f
 
-#define SAMPLE_TIME_S 0.0000001
+#define SAMPLE_TIME_S 0.001
 
 // Maximum run-time of simulation
 #define SIMULATION_TIME_MAX 1.0
 // ------------------------------------------------------------------
 
-internal float TestSystem_Update(float inp)
+internal float PIDSystem_Update(float inp)
 {
     static float output = 0.0f;
     static const float alpha = 0.02f;
@@ -66,14 +68,14 @@ internal float TestSystem_Update(float inp)
 
 struct Measurement
 {
-    std::string Timestamp;
+    int64_t Timestamp;
     float TemperatureCelcius;
     float Humidity;
 
     void print()
     {
         printf("\n        Measurement:\n");
-        printf("        Timestamp:\t\t%s\n", Timestamp.c_str());
+        printf("        Timestamp:\t\t%ld\n", Timestamp);
         printf("        TemperatureCelcius:\t%f\n", TemperatureCelcius);
         printf("        Humidity:\t\t%f\n", Humidity);
     }
@@ -172,22 +174,15 @@ deserializeJSON(char *buffer)
         json j_complete = json::parse(ss);
         std::cout << std::setw(4) << j_complete << "\n\n";
 
-        auto t = std::time(nullptr);
-        auto tm = *std::localtime(&t);
+        int64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-        std::ostringstream oss;
-        oss << std::put_time(&tm, "%d.%m.%Y %T");
-        std::string dateTimeNow = oss.str();
-
-        newMeasurement.Timestamp = dateTimeNow;
+        newMeasurement.Timestamp = timestamp;
         newMeasurement.TemperatureCelcius = 0.0f;
         newMeasurement.Humidity = 0.0f;
 
         // special iterator member functions for objects
         for (json::iterator it = j_complete.begin(); it != j_complete.end(); ++it)
         {
-            // std::cout << it.key() << " : " << it.value() << "\n";
-
             if (it.key() == "temperature_celcius")
             {
                 newMeasurement.TemperatureCelcius = it.value();
@@ -247,6 +242,29 @@ initializeSerialCommunication(int fd, unsigned int connectionAttempts, unsigned 
     }
 
     printf("\n        Skogsnet is running now, connected to port: %s\n\n", portnameString.c_str());
+}
+
+void write_measurement_to_file(Measurement measurement, float pidOut, float correctedOutput)
+{
+    // Check if the file output.dat exists, if not create it and write the header TemperatureCelcius, Humidity, Timestamp, PIDOutput, CorrectedOutput to the file.
+    if (access("output.dat", F_OK) == -1)
+    {
+        std::ofstream file;
+        file.open("output.dat");
+        file << "UnixTimestampInMilliseconds\tTemperatureCelcius\tHumidity\tPIDOutput\tCorrectedOutput\n";
+        file.close();
+    }
+
+    FILE *fp;
+    fp = fopen("output.dat", "a");
+    if (fp == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
+    fprintf(fp, "%ld\t%f\t%f\t%f\t%f\n", measurement.Timestamp, measurement.TemperatureCelcius, measurement.Humidity, pidOut, correctedOutput);
+    fclose(fp);
 }
 
 int main(int argc, char *argv[])
@@ -342,8 +360,13 @@ int main(int argc, char *argv[])
 
         for (float t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
         {
+            if (t > SIMULATION_TIME_MAX)
+            {
+                break;
+            }
+
             // Get measurement from system
-            float correctedOutput = TestSystem_Update(pid.out);
+            float correctedOutput = PIDSystem_Update(pid.out);
 
             // Compute new control signal
             PIDControllerUpdate(&pid, setpoint, newMeasurement.TemperatureCelcius);
@@ -351,6 +374,7 @@ int main(int argc, char *argv[])
             if (t == 0)
             {
                 printf("        t: %f\tmeasurement: %f\tpid.out: %f\tcorrectedOutput: %f\r\n", t, newMeasurement.TemperatureCelcius, pid.out, correctedOutput);
+                write_measurement_to_file(newMeasurement, pid.out, correctedOutput);
             }
 
             gettimeofday(&_ttime, &_tzone);
