@@ -5,7 +5,7 @@
 CC = g++
 
 # define any compile-time flags
-CPPFLAGS = -std=c++23 -g -Ofast
+CPPFLAGS = -std=c++23 -g -Ofast -Wall
 CPPFLAGS += -I/usr/include
 
 # define library paths in addition to /usr/lib
@@ -53,6 +53,10 @@ clean:
 	@echo        Cleaning
 	rm -r build 2> /dev/null || true
 	rm -r code/*.o 2> /dev/null || true
+	@echo
+	@echo        Taking a backup of the old results
+	cp output.dat output_old.dat 2> /dev/null || true
+	rm output.dat 2> /dev/null || true
 	
 run:
 	@echo
