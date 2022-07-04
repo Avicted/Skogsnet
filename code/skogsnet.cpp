@@ -28,16 +28,14 @@ using json = nlohmann::json;
 // Program constants ------------------------------------------------
 global_variable long int MemoryAllocatedCPU = 0L;
 global_variable const float PI = acos(-1);
-
 global_variable struct timeval _ttime;
 global_variable struct timezone _tzone;
 global_variable double program_time_start;
-
 global_variable bool running;
 
 std::string portname = "/dev/ttyACM";
 
-// Controller parameters
+// PID Controller parameters
 #define PID_KP 2.0f
 #define PID_KI 0.5f
 #define PID_KD 0.25f
@@ -56,7 +54,8 @@ std::string portname = "/dev/ttyACM";
 #define SIMULATION_TIME_MAX 1.0
 // ------------------------------------------------------------------
 
-internal float PIDSystem_Update(float inp)
+internal float
+PIDSystem_Update(float inp)
 {
     static float output = 0.0f;
     static const float alpha = 0.02f;
