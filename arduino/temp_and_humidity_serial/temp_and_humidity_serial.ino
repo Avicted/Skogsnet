@@ -11,13 +11,9 @@
 const int capacity = JSON_OBJECT_SIZE(2);
 StaticJsonDocument<capacity> doc;
 
-// JsonObject temperature_celcius = doc.createNestedObject("temperature_celcius");
-// JsonObject humidity = doc.createNestedObject("humidity");
-
 void setup()
 {
-  Serial.begin(115200); // start serial for output
-  // Serial.println("Slim bob! :)\n");
+  Serial.begin(115200);
 
   TH02.begin();
   TSL2561.init();
@@ -26,10 +22,6 @@ void setup()
 void loop()
 {
   StaticJsonDocument<1024> doc;
-  // JsonArray array = doc.to<JsonArray>();
-  // JsonObject nested = array.createNestedObject();
-  // nested["hello"] = "world";
-  // serializeJson(array, Serial);
 
   float temper = TH02.ReadTemperature();
   doc["temperature_celcius"] = temper;
