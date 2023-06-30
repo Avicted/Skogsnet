@@ -379,7 +379,9 @@ int main(int argc, char *argv[])
 
         unsigned long int totalSteps = (f64)SIMULATION_TIME_MAX / (f64)SAMPLE_TIME_S;
         printf("\n\tSimulated %ld steps out of %ld total steps\n", steps - 1, totalSteps);
-        printf("\tPID computation run time microseconds per step: %lf\n", (time_end - pid_time_start) / (f64)steps * 1000000.);
+        printf("\tPID computation total run time: (s): %lf\n", (time_end - pid_time_start));
+        printf("\tPID computation total run time (ms): %lf\n", (time_end - pid_time_start) * 1000.);
+        printf("\tPID computation total run time (μS): %lf\n", (time_end - pid_time_start) * 1000000.);
     }
 
     print_performance_metrics();

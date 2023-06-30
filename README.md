@@ -53,20 +53,8 @@ make[1]: Entering directory '/home/avic/projects/Skogsnet/build'
 [ 70%] Built target glfw
 [ 94%] Built target raylib
 [ 97%] Building CXX object CMakeFiles/Frontend.dir/Frontend.cpp.o
-[100%] Linking CXX executable Frontend
-[100%] Built target Frontend
-make[1]: Leaving directory '/home/avic/projects/Skogsnet/build'
-make[1]: Entering directory '/home/avic/projects/Skogsnet'
-make[1]: *** ../build: No such file or directory.  Stop.
-make[1]: Leaving directory '/home/avic/projects/Skogsnet'
-Running raylib_frontend
-
-	No input args OK!
-Current working directory: /home/avic/projects/Skogsnet
-	Hello from raylib_frontend!
-	 Successfully read 121 data points from file!
 ./build/skogsnet_v0.0.2
-        Settings up time measurement and serial communications...
+	Settings up time measurement and serial communications...
 ./build/skogsnet_v0.0.2
 
       Trying port: /dev/ttyACM0
@@ -74,46 +62,81 @@ Current working directory: /home/avic/projects/Skogsnet
         Skogsnet is running now, connected to port: /dev/ttyACM0
 
 {
-    "humidity": 65.6875,
-    "temperature_celcius": 25.25
+    "humidity": 66.375,
+    "temperature_celcius": 26.125
 }
 
 
         Measurement:
-        Timestamp:		1688134244402
-        TemperatureCelcius:	25.250000
-        Humidity:		65.687500
+        Timestamp:		1688155892569
+        TemperatureCelcius:	26.125000
+        Humidity:		66.375000
 
         Time (s)	System Output		ControllerOutput	CorrectedOutput
-        t: 0.000000	measurement: 25.250000	pid.out: -10.000000	correctedOutput: 0.000000
-        Successfully wrote to file: 1688134244402	25.250000	65.687500	-10.000000	0.000000
+        t: 0.000000	measurement: 26.125000	pid.out: -10.000000	correctedOutput: 0.000000
+	Successfully wrote to file: 1688155892569	26.125000	66.375000	-10.000000	0.000000
 
-        Simulated 1001 steps out of 1000 total steps
-        PID computation run time = 0.0 secs out of our time budget: 1.000000
-	 Successfully read latest data point from file at time: 1688134244402
-	 DataPointCount: 122
+	Simulated 1000 steps out of 1000 total steps
+	PID computation total run time: (s): 0.000188
+	PID computation total run time (ms): 0.187874
+	PID computation total run time (μS): 187.873840
+[100%] Linking CXX executable Frontend
+[100%] Built target Frontend
+make[1]: Leaving directory '/home/avic/projects/Skogsnet/build'
+make[1]: Entering directory '/home/avic/projects/Skogsnet/build'
+[ 70%] Built target glfw
+[ 94%] Built target raylib
+[100%] Built target Frontend
+make[1]: Leaving directory '/home/avic/projects/Skogsnet/build'
+Running raylib_frontend
+
+	No input args OK!
+Current working directory: /home/avic/projects/Skogsnet
+	Hello from raylib_frontend!
+	 Successfully read 2459 data points from file!
 {
-    "humidity": 65.8125,
-    "temperature_celcius": 25.25
+    "humidity": 66.375,
+    "temperature_celcius": 26.09375
 }
 
 
         Measurement:
-        Timestamp:		1688134249464
-        TemperatureCelcius:	25.250000
-        Humidity:		65.812500
+        Timestamp:		1688155897626
+        TemperatureCelcius:	26.093750
+        Humidity:		66.375000
 
         Time (s)	System Output		ControllerOutput	CorrectedOutput
-        t: 0.000000	measurement: 25.250000	pid.out: -10.000000	correctedOutput: -9.308496
-        Successfully wrote to file: 1688134249464	25.250000	65.812500	-10.000000	-9.308496
+        t: 0.000000	measurement: 26.093750	pid.out: -10.000000	correctedOutput: -9.326022
+	Successfully wrote to file: 1688155897626	26.093750	66.375000	-10.000000	-9.326022
 
-        Simulated 1001 steps out of 1000 total steps
-        PID computation run time = 0.0 secs out of our time budget: 1.000000
-	 Successfully read latest data point from file at time: 1688134249464
-	 DataPointCount: 123
+	Simulated 1000 steps out of 1000 total steps
+	PID computation total run time: (s): 0.000187
+	PID computation total run time (ms): 0.187159
+	PID computation total run time (μS): 187.158585
+	DataPointCount: 2460
 {
-    "humidity": 65.6875,
-    "temperature_celcius": 25.25
+    "humidity": 66.25,
+    "temperature_celcius": 26.15625
+}
+
+
+        Measurement:
+        Timestamp:		1688155902683
+        TemperatureCelcius:	26.156250
+        Humidity:		66.250000
+
+        Time (s)	System Output		ControllerOutput	CorrectedOutput
+        t: 0.000000	measurement: 26.156250	pid.out: -10.000000	correctedOutput: -19.051542
+	Successfully wrote to file: 1688155902683	26.156250	66.250000	-10.000000	-19.051542
+
+	Simulated 1000 steps out of 1000 total steps
+	PID computation total run time: (s): 0.000089
+	PID computation total run time (ms): 0.088930
+	PID computation total run time (μS): 88.930130
+	DataPointCount: 2461
+{
+    "humidity": 66.25,
+    "temperature_celcius": 26.125
 }
 
 ```

@@ -156,11 +156,15 @@ GetNewData(f32 DeltaTime)
         // If the is any new data point -> Append the latest data point to the end of DataPoints
         if (DataPoint.UnixTimestamp != DataPoints[DataPointCount - 1].UnixTimestamp)
         {
-            printf("\t Successfully read latest data point from file at time: %llu\n", DataPoint.UnixTimestamp);
+            if (Debug)
+            {
+                printf("\t Successfully read latest data point from file at time: %llu\n", DataPoint.UnixTimestamp);
+            }
+
             DataPoints[DataPointCount] = DataPoint;
             DataPointCount++;
 
-            printf("\t DataPointCount: %llu\n", DataPointCount);
+            printf("\tDataPointCount: %llu\n", DataPointCount);
         }
     }
 }
