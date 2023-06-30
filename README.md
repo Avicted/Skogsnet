@@ -146,7 +146,7 @@ Current working directory: /home/avic/projects/Skogsnet
 _How to install required dependencies._
 
 ```shell
-sudo pacman -S nlohmann-json
+sudo pacman -S nlohmann-json base-devel cmake
 ```
 
 ## Running
