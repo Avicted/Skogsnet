@@ -1,23 +1,4 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sys/time.h>
-#include <algorithm>
-#include <fstream>
-#include <random>
-#include <climits>
-#include <sstream>
-#include <errno.h>
-#include <fcntl.h>
-#include <string.h>
-#include <ctime>
-#include <termios.h>
-#include <unistd.h>
-#include <chrono>
-#include <signal.h>
-#include "json.hpp"
-using json = nlohmann::json;
+#include "../Includes.h"
 #include "PID.hpp"
 
 // Cpp spec does shenanigans with the usage of <static>, let's be explicit in what
@@ -28,10 +9,10 @@ using json = nlohmann::json;
 
 // Program constants ------------------------------------------------
 global_variable long int MemoryAllocatedCPU = 0L;
-global_variable const float PI = acos(-1);
+global_variable const f32 PI = acos(-1);
 global_variable struct timeval _ttime;
 global_variable struct timezone _tzone;
-global_variable double program_time_start;
+global_variable f64 program_time_start;
 global_variable bool running;
 
 std::string portname = "/dev/ttyACM";
@@ -55,11 +36,11 @@ std::string portname = "/dev/ttyACM";
 #define SIMULATION_TIME_MAX 1.0
 // ------------------------------------------------------------------
 
-internal float
-PIDSystem_Update(float inp)
+internal f32
+PIDSystem_Update(f32 inp)
 {
-    static float output = 0.0f;
-    static const float alpha = 0.02f;
+    static f32 output = 0.0f;
+    static const f32 alpha = 0.02f;
 
     output = (SAMPLE_TIME_S * inp + output) / (1.0f + alpha * SAMPLE_TIME_S);
 
@@ -69,8 +50,8 @@ PIDSystem_Update(float inp)
 struct Measurement
 {
     int64_t Timestamp;
-    float TemperatureCelcius;
-    float Humidity;
+    f32 TemperatureCelcius;
+    f32 Humidity;
 
     void print()
     {
@@ -145,13 +126,13 @@ print_performance_metrics()
     printf("\n        [Performance Metrics]\n");
     printf("        Total memory allocated \t\t = %.1lf MB\n", MemoryAllocatedCPU / 1000000.0);
     gettimeofday(&_ttime, &_tzone);
-    double time_end = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+    f64 time_end = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
 
     printf("        Current Wall clock run time \t = %.1lf secs\n", time_end - program_time_start);
 }
 
 internal void
-intHandler(int dummy)
+interrupt_handler(int dummy)
 {
     running = false;
     printf("\n        dummy: %d\n", dummy);
@@ -159,7 +140,7 @@ intHandler(int dummy)
 }
 
 internal Measurement
-deserializeJSON(char *buffer)
+deserialize_JSON(char *buffer)
 {
     Measurement newMeasurement = {};
 
@@ -207,7 +188,7 @@ deserializeJSON(char *buffer)
 }
 
 internal void
-initializeSerialCommunication(int fd, unsigned int connectionAttempts, unsigned int maxConnectionAttempts)
+initialize_serialCommunication(int fd, unsigned int connectionAttempts, unsigned int maxConnectionAttempts)
 {
     // Read data from the Arduinos Serial port in the Linux host
     // Let us try five ports lol
@@ -244,7 +225,8 @@ initializeSerialCommunication(int fd, unsigned int connectionAttempts, unsigned 
     printf("\n        Skogsnet is running now, connected to port: %s\n\n", portnameString.c_str());
 }
 
-void write_measurement_to_file(Measurement measurement, float pidOut, float correctedOutput)
+internal void
+write_measurement_to_file(Measurement measurement, f32 pidOut, f32 correctedOutput)
 {
     // Check if the file output.dat exists, if not create it and write the header TemperatureCelcius, Humidity, Timestamp, PIDOutput, CorrectedOutput to the file.
     if (access("output.dat", F_OK) == -1)
@@ -265,21 +247,21 @@ void write_measurement_to_file(Measurement measurement, float pidOut, float corr
 
     fprintf(fp, "%ld\t%f\t%f\t%f\t%f\n", measurement.Timestamp, measurement.TemperatureCelcius, measurement.Humidity, pidOut, correctedOutput);
 
-    printf("        Successfully wrote to file: %ld\t%f\t%f\t%f\t%f\n", measurement.Timestamp, measurement.TemperatureCelcius, measurement.Humidity, pidOut, correctedOutput);
+    printf("\tSuccessfully wrote to file: %ld\t%f\t%f\t%f\t%f\n", measurement.Timestamp, measurement.TemperatureCelcius, measurement.Humidity, pidOut, correctedOutput);
 
     fclose(fp);
 }
 
 int main(int argc, char *argv[])
 {
-    printf("        Settings up time measurement and serial communications...\n");
+    printf("\tSettings up time measurement and serial communications...\n");
 
     // Time measurement
     gettimeofday(&_ttime, &_tzone);
-    program_time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+    program_time_start = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
 
     // Signals
-    signal(SIGINT, intHandler);
+    signal(SIGINT, interrupt_handler);
 
     // Unused input arguments
     if (argc > 0)
@@ -297,7 +279,7 @@ int main(int argc, char *argv[])
     std::string portnameString = portname + std::to_string(connectionAttempts);
     int fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC); // file descriptor
 
-    initializeSerialCommunication(fd, connectionAttempts, maxConnectionAttempts);
+    initialize_serialCommunication(fd, connectionAttempts, maxConnectionAttempts);
 
     // Initialise PID controller
     PIDController pid = {
@@ -315,7 +297,7 @@ int main(int argc, char *argv[])
     PIDControllerInitialize(&pid);
 
     // Simulate response using test system
-    float setpoint = 20.0f;
+    f32 setpoint = 20.0f;
 
     // Main loop
     running = true;
@@ -352,16 +334,16 @@ int main(int argc, char *argv[])
         }
 
         // Deserialize data -----------------------------------------------
-        Measurement newMeasurement = deserializeJSON(buffer);
+        Measurement newMeasurement = deserialize_JSON(buffer);
 
         // PID control the based on the data ------------------------------
         gettimeofday(&_ttime, &_tzone);
-        double pid_time_start = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+        f64 pid_time_start = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
 
         printf("\n        Time (s)\tSystem Output\t\tControllerOutput\tCorrectedOutput\r\n");
         unsigned long int steps = 0;
 
-        for (float t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
+        for (f32 t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
         {
             if (t > SIMULATION_TIME_MAX)
             {
@@ -369,7 +351,7 @@ int main(int argc, char *argv[])
             }
 
             // Get measurement from system
-            float correctedOutput = PIDSystem_Update(pid.out);
+            f32 correctedOutput = PIDSystem_Update(pid.out);
 
             // Compute new control signal
             PIDControllerUpdate(&pid, setpoint, newMeasurement.TemperatureCelcius);
@@ -381,7 +363,7 @@ int main(int argc, char *argv[])
             }
 
             gettimeofday(&_ttime, &_tzone);
-            double time_end = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+            f64 time_end = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
             if (pid_time_start - time_end >= 1.0)
             {
                 printf("        Warning: PID computation took too long time_end: %lf!\n", pid_time_start - time_end);
@@ -393,11 +375,11 @@ int main(int argc, char *argv[])
         }
 
         gettimeofday(&_ttime, &_tzone);
-        double time_end = (double)_ttime.tv_sec + (double)_ttime.tv_usec / 1000000.;
+        f64 time_end = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
 
-        unsigned long int totalSteps = (double)SIMULATION_TIME_MAX / (double)SAMPLE_TIME_S;
-        printf("\n        Simulated %ld steps out of %ld total steps\n", steps, totalSteps);
-        printf("        PID computation run time = %.1lf secs out of our time budget: %f\n", (time_end - pid_time_start), SIMULATION_TIME_MAX);
+        unsigned long int totalSteps = (f64)SIMULATION_TIME_MAX / (f64)SAMPLE_TIME_S;
+        printf("\n\tSimulated %ld steps out of %ld total steps\n", steps - 1, totalSteps);
+        printf("\tPID computation run time microseconds per step: %lf\n", (time_end - pid_time_start) / (f64)steps * 1000000.);
     }
 
     print_performance_metrics();

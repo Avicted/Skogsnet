@@ -23,11 +23,10 @@ OBJ_FILES   := $(SRC_FILES:.cpp=.o)
 # define the executable file 
 TARGET = skogsnet_v0.0.1
 
-all: dirs raylibfrontend $(TARGET)  
+all: dirs raylibfrontend $(TARGET) 
 	@echo
 	@echo        The Serial Temperature and Humidity reader program has been built and runned successfully!
-
-gui: raylibfrontend
+	@echo 
 
 $(TARGET): $(OBJ_FILES)
 	@echo
@@ -49,6 +48,9 @@ dirs:
 clean:
 	@echo
 	@echo        Cleaning
+	rm graph.png 2> /dev/null || true
+	rm -r FrontendVirtualEnvironment/* 2> /dev/null || true
+	rm -r build/* 2> /dev/null || true
 	rm -r code/*.o 2> /dev/null || true
 	@echo
 	@echo        Taking a backup of the old results

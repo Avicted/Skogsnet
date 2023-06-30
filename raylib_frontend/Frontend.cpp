@@ -1,4 +1,5 @@
-#include "Includes.h"
+#include "../Includes.h"
+#include "raylib_includes.h"
 
 global_variable i32 ScreenWidth = 640 * 2;
 global_variable i32 ScreenHeight = 360 * 2;
@@ -9,7 +10,7 @@ global_variable const char *DataFilePath = "./output.dat";
 
 struct DataPoint
 {
-    u64 UnixTimestamp;
+    u32 UnixTimestamp;
     f32 TemperatureCelsius = -2000.0f; // lol
     f32 HumidityPercent;
 };

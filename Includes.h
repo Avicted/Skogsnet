@@ -9,21 +9,24 @@
 #include <string>
 #include <cmath>
 #include <signal.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <algorithm>
+#include <fstream>
+#include <random>
+#include <climits>
+#include <sstream>
+#include <errno.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <unistd.h>
+#include <chrono>
 
-// Reference additional headers your program requires here.
-#include "raylib.h"
-#include "rlgl.h"
-#include "raymath.h"
-
-#if defined(PLATFORM_DESKTOP)
-#define GLSL_VERSION 330
-#else // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-#define GLSL_VERSION 100
-#endif
-
-#if defined(PLATFORM_WEB)
-#include <emscripten/emscripten.h>
-#endif
+// Third party
+#include "code/json.hpp"
+using json = nlohmann::json;
 
 // Program specific stuff --------------------------------------
 #define local_persist static   // localy scoped persisted variable
