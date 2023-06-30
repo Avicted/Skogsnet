@@ -2,16 +2,16 @@
 # Output the executable into the build directory
 
 # define the C++ compiler to use
-CC = g++
+CC = clang
 
 # define any compile-time flags
-CPPFLAGS = -std=c++23 -g -Ofast -Wall
+CPPFLAGS = -Wall -g -std=c++11 -fopenmp
 CPPFLAGS += -I/usr/include
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LDFLAGS 	 	:= -lm -fopenmp
+LDFLAGS 	 	:= -fopenmp -lstdc++ -lm
 LDLIBS   		:= -L /usr/lib
 
 SRC_DIR 	:= ./code
@@ -23,18 +23,11 @@ OBJ_FILES   := $(SRC_FILES:.cpp=.o)
 # define the executable file 
 TARGET = skogsnet_v0.0.1
 
-#
-# The following part of the makefile is generic; it can be used to 
-# build any executable just by changing the definitions above and by
-# deleting dependencies appended to the file from 'make depend'
-#
-
-.PHONY: depend clean
-
-
-all: clean dirs $(TARGET)
+all: dirs raylibfrontend $(TARGET)  
 	@echo
 	@echo        The Serial Temperature and Humidity reader program has been built and runned successfully!
+
+gui: raylibfrontend
 
 $(TARGET): $(OBJ_FILES)
 	@echo
@@ -42,6 +35,11 @@ $(TARGET): $(OBJ_FILES)
 	$(CC) $(CPPFLAGS) -o ./build/$(TARGET) $(SRC_FILES) $(LDLIBS) $(LDFLAGS)
 	./build/$(TARGET)
 	mv ./code/*.o ./build/
+
+raylibfrontend:
+	@echo
+	@echo		Building and running the raylib frontend
+	./raylib_frontend/build.sh&
 
 dirs:
 	@echo
@@ -51,20 +49,13 @@ dirs:
 clean:
 	@echo
 	@echo        Cleaning
-	rm -r build 2> /dev/null || true
 	rm -r code/*.o 2> /dev/null || true
 	@echo
 	@echo        Taking a backup of the old results
-	cp output.dat output_old.dat 2> /dev/null || true
-	rm output.dat 2> /dev/null || true
+	cp ./build/output.dat output_old.dat 2> /dev/null || true
 	
 run:
 	@echo
 	@echo        Running the executable
 	./build/$(TARGET)
-
-depend: $(SRC_FILES)
-	makedepend $(INCLUDES) $^
-
-# DO NOT DELETE THIS LINE -- make depend needs it
 

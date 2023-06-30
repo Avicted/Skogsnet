@@ -41,7 +41,7 @@ command_list = {
  { .name = "run",
    .out = "*run*", .footer_panel = false, .save_dirty_files = false,
    .cmd = { { ".\\bin\\game.exe", .os = "win"   },
-            { "make run", .os = "linux"   }, }, },
+            { "make", .os = "linux"   }, }, },
 };
 fkey_command[1] = "build";
 fkey_command[2] = "run";

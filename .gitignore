@@ -1,8 +1,14 @@
+# Editor
 .vscode/
+
+# Build
 build/
 result.out
 /**/*.o
-noise.pgm
-noise.png
+*.o
 output.dat
 output_old.dat
+
+# Python
+python_frontend/python_frontend
+.ipynb_checkpoints/
