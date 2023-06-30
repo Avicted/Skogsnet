@@ -237,6 +237,14 @@ internal void
 SigIntHandler(i32 Signal)
 {
     printf("\tCaught SIGINT, exiting peacefully!\n");
+
+    CloseWindow(); // Close window and OpenGL context
+
+    printf("Memory used in GigaBytes: %f\n", (f32)CPUMemory / (f32)Gigabytes(1));
+    printf("Memory used in MegaBytes: %f\n", (f32)CPUMemory / (f32)Megabytes(1));
+
+    free(DataPoints);
+
     exit(0);
 }
 
