@@ -1,20 +1,21 @@
-#include "Includes.h"
+#include "../Includes.h"
+#include "raylib_includes.h"
 
-global_variable i32 ScreenWidth = 640 * 2;
-global_variable i32 ScreenHeight = 360 * 2;
-global_variable bool Debug = false;
-global_variable long int CPUMemory = 0L;
-global_variable usize DataPointCount = 0;
-global_variable const char *DataFilePath = "./output.dat";
+i32 ScreenWidth = 640 * 2;
+i32 ScreenHeight = 360 * 2;
+bool Debug = false;
+global_variable i64 CPUMemory = 0L;
+usize DataPointCount = 0;
+const char *DataFilePath = "./output.dat";
 
 struct DataPoint
 {
-    u64 UnixTimestamp;
-    f32 TemperatureCelsius = -2000.0f; // lol
+    u32 UnixTimestamp;
+    f32 TemperatureCelsius = 0.0f;
     f32 HumidityPercent;
 };
 
-global_variable DataPoint *DataPoints = NULL;
+DataPoint *DataPoints = NULL;
 
 internal void
 ParseInputArgs(i32 argc, char **argv)
@@ -233,17 +234,25 @@ GameRender(f32 DeltaTime)
     EndDrawing();
 }
 
-internal void
-SigIntHandler(i32 Signal)
+void CleanupOurStuff(void)
 {
-    printf("\tCaught SIGINT, exiting peacefully!\n");
-
     CloseWindow(); // Close window and OpenGL context
 
     printf("\tMemory used in GigaBytes: %f\n", (f32)CPUMemory / (f32)Gigabytes(1));
     printf("\tMemory used in MegaBytes: %f\n", (f32)CPUMemory / (f32)Megabytes(1));
 
     free(DataPoints);
+
+    CPUMemory -= 10000000ULL * sizeof(DataPoint);
+    printf("Freeing DataPoints: %llu\n", 10000000ULL * sizeof(DataPoint));
+}
+
+internal void
+SigIntHandler(i32 Signal)
+{
+    printf("\tCaught SIGINT, exiting peacefully!\n");
+
+    CleanupOurStuff();
 
     exit(0);
 }
@@ -285,12 +294,7 @@ int main(int argc, char **argv)
         GameRender(DeltaTime);
     }
 #endif
-        CloseWindow(); // Close window and OpenGL context
-
-        printf("\tMemory used in GigaBytes: %f\n", (f32)CPUMemory / (f32)Gigabytes(1));
-        printf("\tMemory used in MegaBytes: %f\n", (f32)CPUMemory / (f32)Megabytes(1));
-
-        free(DataPoints);
+        CleanupOurStuff();
 
         return (0);
     }
