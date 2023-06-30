@@ -107,7 +107,7 @@ ReadDataFromFile(const char *FileName)
 internal void
 PrintData(void)
 {
-    for (usize i = 0; i < 100000ULL; ++i)
+    for (usize i = 0; i < 10000000ULL; ++i)
     {
         DataPoint *DataPoint = &DataPoints[i];
         printf("\tDataPoint[%llu]: UnixTimestamp: %llu, TemperatureCelsius: %f, HumidityPercent: %f\n", i, DataPoint->UnixTimestamp, DataPoint->TemperatureCelsius, DataPoint->HumidityPercent);
@@ -240,8 +240,8 @@ SigIntHandler(i32 Signal)
 
     CloseWindow(); // Close window and OpenGL context
 
-    printf("Memory used in GigaBytes: %f\n", (f32)CPUMemory / (f32)Gigabytes(1));
-    printf("Memory used in MegaBytes: %f\n", (f32)CPUMemory / (f32)Megabytes(1));
+    printf("\tMemory used in GigaBytes: %f\n", (f32)CPUMemory / (f32)Gigabytes(1));
+    printf("\tMemory used in MegaBytes: %f\n", (f32)CPUMemory / (f32)Megabytes(1));
 
     free(DataPoints);
 
@@ -268,8 +268,8 @@ int main(int argc, char **argv)
         SetTargetFPS(60);
     }
 
-    DataPoints = (DataPoint *)calloc(1000000ULL, sizeof(DataPoint));
-    CPUMemory += 1000000ULL * sizeof(DataPoint);
+    DataPoints = (DataPoint *)calloc(10000000ULL, sizeof(DataPoint));
+    CPUMemory += 10000000ULL * sizeof(DataPoint);
 
     ReadDataFromFile(DataFilePath);
 
@@ -287,8 +287,8 @@ int main(int argc, char **argv)
 #endif
         CloseWindow(); // Close window and OpenGL context
 
-        printf("Memory used in GigaBytes: %f\n", (f32)CPUMemory / (f32)Gigabytes(1));
-        printf("Memory used in MegaBytes: %f\n", (f32)CPUMemory / (f32)Megabytes(1));
+        printf("\tMemory used in GigaBytes: %f\n", (f32)CPUMemory / (f32)Gigabytes(1));
+        printf("\tMemory used in MegaBytes: %f\n", (f32)CPUMemory / (f32)Megabytes(1));
 
         free(DataPoints);
 
