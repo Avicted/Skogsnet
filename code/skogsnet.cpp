@@ -7,6 +7,7 @@
 #include <fstream>
 #include <random>
 #include <climits>
+#include <sstream>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -160,13 +161,13 @@ intHandler(int dummy)
 internal Measurement
 deserializeJSON(char *buffer)
 {
-    Measurement newMeasurement;
+    Measurement newMeasurement = {};
 
     // JSON deserializer
     try
     {
         // fill a stream with JSON text
-        std::stringstream ss;
+        std::stringstream ss = std::stringstream();
         ss << buffer;
 
         // parse and serialize JSON
@@ -263,6 +264,9 @@ void write_measurement_to_file(Measurement measurement, float pidOut, float corr
     }
 
     fprintf(fp, "%ld\t%f\t%f\t%f\t%f\n", measurement.Timestamp, measurement.TemperatureCelcius, measurement.Humidity, pidOut, correctedOutput);
+
+    printf("        Successfully wrote to file: %ld\t%f\t%f\t%f\t%f\n", measurement.Timestamp, measurement.TemperatureCelcius, measurement.Humidity, pidOut, correctedOutput);
+
     fclose(fp);
 }
 
@@ -319,7 +323,7 @@ int main(int argc, char *argv[])
     {
         // Read data ---------------------------------------------------
         unsigned int bufferSize = 256;
-        char buffer[bufferSize] = {0};
+        char buffer[256] = {0};
         unsigned int pos = 0;
 
         MemoryAllocatedCPU += 1L * bufferSize * sizeof(char);
