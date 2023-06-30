@@ -134,19 +134,7 @@ _How to start both programs._
 make
 ```
 
-_How to start only the logging program._
-
-```shell
-make run
-```
-
-_How to start only the Visualization program._
-
-```shell
-make gui
-```
-
-<br>
+## Screenshot
 
 ![screenshot.png](screenshot.png "screenshot.png")
 
