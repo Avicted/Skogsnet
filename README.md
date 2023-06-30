@@ -32,7 +32,7 @@ Building and running the raylib frontend
 ./raylib_frontend/build.sh&
 
 Building the program
-clang -Wall -g -std=c++11 -fopenmp -I/usr/include -o ./build/skogsnet_v0.0.1 ./code/PID.cpp ./code/skogsnet.cpp -L /usr/lib -fopenmp -lstdc++ -lm
+clang -Wall -g -std=c++11 -fopenmp -I/usr/include -o ./build/skogsnet_v0.0.2 ./code/PID.cpp ./code/skogsnet.cpp -L /usr/lib -fopenmp -lstdc++ -lm
 Compiling raylib_frontend
 
 -- Testing if -Werror=pointer-arith can be used -- compiles
@@ -65,9 +65,9 @@ Running raylib_frontend
 Current working directory: /home/avic/projects/Skogsnet
 	Hello from raylib_frontend!
 	 Successfully read 121 data points from file!
-./build/skogsnet_v0.0.1
+./build/skogsnet_v0.0.2
         Settings up time measurement and serial communications...
-./build/skogsnet_v0.0.1
+./build/skogsnet_v0.0.2
 
       Trying port: /dev/ttyACM0
 

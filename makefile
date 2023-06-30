@@ -21,7 +21,7 @@ INCLUDES    := $(wildcard $(SRC_DIR)/*.hpp)
 OBJ_FILES   := $(SRC_FILES:.cpp=.o)
 
 # define the executable file 
-TARGET = skogsnet_v0.0.1
+TARGET = skogsnet_v0.0.2
 
 all: dirs raylibfrontend $(TARGET) 
 	@echo
