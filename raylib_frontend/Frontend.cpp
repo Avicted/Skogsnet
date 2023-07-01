@@ -8,6 +8,7 @@ global_variable i64 CPUMemory = 0L;
 usize DataPointCount = 0;
 const char *DataFilePath = "./output.dat";
 Camera2D MainCamera = {0};
+Font MainFont = {0};
 
 struct DataPoint
 {
@@ -269,15 +270,33 @@ GameRender(f32 DeltaTime)
 
     EndMode2D();
 
+    const char *ProgramVersion = "Skogsnet_v0.0.3";
+    DrawTextEx(MainFont, ProgramVersion, {10, 10}, 20, 2, DARKGRAY);
+    // Shadow in dark pink
+    DrawTextEx(MainFont, ProgramVersion, {12, 12}, 20, 2, ORANGE);
+
     DataPoint *DataPoint = &DataPoints[DataPointCount - 1];
-    char Text[256];
-    sprintf(Text, "Temperature: %f, Humidity: %f", DataPoint->TemperatureCelsius, DataPoint->HumidityPercent);
-    DrawText(Text, 10, 10, 40, WHITE);
+    char TempText[256];
+    sprintf(TempText, "Temperature: %f", DataPoint->TemperatureCelsius);
+    DrawTextEx(MainFont, TempText, {10, 40}, 20, 2, DARKGRAY);
+    // Shadow in dark pink
+    DrawTextEx(MainFont, TempText, {12, 42}, 20, 2, RED);
+
+    char HumidityText[256];
+    sprintf(HumidityText, "Humidity: %f", DataPoint->HumidityPercent);
+    DrawTextEx(MainFont, HumidityText, {10, 70}, 20, 2, DARKGRAY);
+    // Shadow in dark pink
+    DrawTextEx(MainFont, HumidityText, {12, 72}, 20, 2, GREEN);
 
     // Info text small
     // "Right click to move camera", "Scroll to zoom"
-    DrawText("Right click to move camera", 10, 60, 20, WHITE);
-    DrawText("Scroll to zoom", 10, 80, 20, WHITE);
+    DrawTextEx(MainFont, "Right click to move camera", (Vector2){10, 100}, 12, 2, DARKGRAY);
+    // Shadow in dark pink
+    DrawTextEx(MainFont, "Right click to move camera", (Vector2){12, 102}, 12, 2, PINK);
+
+    DrawTextEx(MainFont, "Scroll to zoom", (Vector2){10, 120}, 12, 2, DARKGRAY);
+    // Shadow in dark pink
+    DrawTextEx(MainFont, "Scroll to zoom", (Vector2){12, 122}, 12, 2, PINK);
 
     if (Debug)
     {
@@ -331,6 +350,7 @@ int main(int argc, char **argv)
     }
 
     MainCamera.zoom = 1.0f;
+    MainFont = LoadFontEx("./build/fonts/Super Mario Bros. 2.ttf", 32, 0, 250);
 
     DataPoints = (DataPoint *)calloc(10000000ULL, sizeof(DataPoint));
     CPUMemory += 10000000ULL * sizeof(DataPoint);
