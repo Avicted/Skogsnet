@@ -48,13 +48,11 @@ dirs:
 clean:
 	@echo
 	@echo        Cleaning
-	rm graph.png 2> /dev/null || true
-	rm -r FrontendVirtualEnvironment/* 2> /dev/null || true
-	rm -r build/* 2> /dev/null || true
-	rm -r code/*.o 2> /dev/null || true
+	rm -rf build 2> /dev/null || true
+	rm -rf code/*.o 2> /dev/null || true
 	@echo
 	@echo        Taking a backup of the old results
-	cp ./build/output.dat output_old.dat 2> /dev/null || true
+	cp output.dat output_old.dat 2> /dev/null || true
 	
 run:
 	@echo
