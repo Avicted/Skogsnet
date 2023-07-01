@@ -7,6 +7,7 @@ bool Debug = false;
 global_variable i64 CPUMemory = 0L;
 usize DataPointCount = 0;
 const char *DataFilePath = "./output.dat";
+Camera2D MainCamera = {0};
 
 struct DataPoint
 {
@@ -69,6 +70,32 @@ HandleWindowResize(void)
 
         ScreenWidth = GetScreenWidth();
         ScreenHeight = GetScreenHeight();
+    }
+}
+
+internal void
+HandleCameraZoom(void)
+{
+    // Zoom based on wheel
+    f32 Wheel = GetMouseWheelMove();
+
+    if (Wheel != 0)
+    {
+        // get the world point that is under the mouse
+        Vector2 MouseWorldPos = GetScreenToWorld2D(GetMousePosition(), MainCamera);
+
+        // set the offset to where the mouse is
+        MainCamera.offset = GetMousePosition();
+
+        // set the target to match, so that the camera maps the world space point under the cursor to the screen space point under the cursor at any zoom
+        MainCamera.target = MouseWorldPos;
+
+        // zoom
+        MainCamera.zoom += Wheel * 0.125f;
+        if (MainCamera.zoom < 0.125f)
+        {
+            MainCamera.zoom = 0.125f;
+        }
     }
 }
 
@@ -173,6 +200,19 @@ internal void
 GameUpdate(f32 DeltaTime)
 {
     HandleWindowResize();
+    HandleCameraZoom();
+
+    {
+        // translate based on right click
+        if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+        {
+            Vector2 Delta = GetMouseDelta();
+            Delta = Vector2Scale(Delta, -1.0f / MainCamera.zoom);
+
+            MainCamera.target = Vector2Add(MainCamera.target, Delta);
+        }
+    }
+
     GetNewData(DeltaTime);
 }
 
@@ -183,22 +223,19 @@ GameRender(f32 DeltaTime)
     {
         ClearBackground(BLACK);
 
+        BeginMode2D(MainCamera);
+
         {
-            // Draw a grid in dark grey in x and y axis with spacing of 100 pixels
-            for (i32 i = 0; i < ScreenWidth; i += 100)
+            // Draw a grid in dark grey in x and y axis with a dimension of 10 x 10, repeating over the whole screen
+            for (i32 i = 0; i < ScreenWidth; i += 50)
             {
                 DrawLine(i, 0, i, ScreenHeight, DARKGRAY);
             }
 
-            for (i32 i = 0; i < ScreenHeight; i += 100)
+            for (i32 i = 0; i < ScreenHeight; i += 50)
             {
                 DrawLine(0, i, ScreenWidth, i, DARKGRAY);
             }
-
-            DataPoint *DataPoint = &DataPoints[DataPointCount - 1];
-            char Text[256];
-            sprintf(Text, "Temperature: %f, Humidity: %f", DataPoint->TemperatureCelsius, DataPoint->HumidityPercent);
-            DrawText(Text, 10, 10, 40, WHITE);
 
             // for (i32 i = 0; i < DataPointCount; ++i);
             for (i32 i = DataPointCount - 1; i >= 0; --i)
@@ -228,11 +265,23 @@ GameRender(f32 DeltaTime)
                 }
             }
         }
+    }
 
-        if (Debug)
-        {
-            DrawFPS(10, 10);
-        }
+    EndMode2D();
+
+    DataPoint *DataPoint = &DataPoints[DataPointCount - 1];
+    char Text[256];
+    sprintf(Text, "Temperature: %f, Humidity: %f", DataPoint->TemperatureCelsius, DataPoint->HumidityPercent);
+    DrawText(Text, 10, 10, 40, WHITE);
+
+    // Info text small
+    // "Right click to move camera", "Scroll to zoom"
+    DrawText("Right click to move camera", 10, 60, 20, WHITE);
+    DrawText("Scroll to zoom", 10, 80, 20, WHITE);
+
+    if (Debug)
+    {
+        DrawFPS(10, 10);
     }
 
     EndDrawing();
@@ -280,6 +329,8 @@ int main(int argc, char **argv)
 #else
         SetTargetFPS(60);
     }
+
+    MainCamera.zoom = 1.0f;
 
     DataPoints = (DataPoint *)calloc(10000000ULL, sizeof(DataPoint));
     CPUMemory += 10000000ULL * sizeof(DataPoint);
