@@ -238,7 +238,6 @@ GameRender(f32 DeltaTime)
                 DrawLine(0, i, ScreenWidth, i, DARKGRAY);
             }
 
-            // for (i32 i = 0; i < DataPointCount; ++i);
             for (i32 i = DataPointCount - 1; i >= 0; --i)
             {
                 i32 PosX = i * (1.0f * ScreenWidth / DataPointCount);
@@ -272,30 +271,26 @@ GameRender(f32 DeltaTime)
 
     const char *ProgramVersion = "Skogsnet_v0.0.3";
     DrawTextEx(MainFont, ProgramVersion, {10, 10}, 20, 2, DARKGRAY);
-    // Shadow in dark pink
+
     DrawTextEx(MainFont, ProgramVersion, {12, 12}, 20, 2, ORANGE);
 
     DataPoint *DataPoint = &DataPoints[DataPointCount - 1];
     char TempText[256];
     sprintf(TempText, "Temperature: %f", DataPoint->TemperatureCelsius);
     DrawTextEx(MainFont, TempText, {10, 40}, 20, 2, DARKGRAY);
-    // Shadow in dark pink
+
     DrawTextEx(MainFont, TempText, {12, 42}, 20, 2, RED);
 
     char HumidityText[256];
     sprintf(HumidityText, "Humidity: %f", DataPoint->HumidityPercent);
     DrawTextEx(MainFont, HumidityText, {10, 70}, 20, 2, DARKGRAY);
-    // Shadow in dark pink
     DrawTextEx(MainFont, HumidityText, {12, 72}, 20, 2, GREEN);
 
-    // Info text small
-    // "Right click to move camera", "Scroll to zoom"
+    // Info text
     DrawTextEx(MainFont, "Right click to move camera", (Vector2){10, 100}, 12, 2, DARKGRAY);
-    // Shadow in dark pink
     DrawTextEx(MainFont, "Right click to move camera", (Vector2){12, 102}, 12, 2, PINK);
 
     DrawTextEx(MainFont, "Scroll to zoom", (Vector2){10, 120}, 12, 2, DARKGRAY);
-    // Shadow in dark pink
     DrawTextEx(MainFont, "Scroll to zoom", (Vector2){12, 122}, 12, 2, PINK);
 
     if (Debug)
