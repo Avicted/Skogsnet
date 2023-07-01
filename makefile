@@ -48,7 +48,6 @@ dirs:
 clean:
 	@echo
 	@echo        Cleaning
-	rm graph.png 2> /dev/null || true
 	rm -rf build 2> /dev/null || true
 	rm -rf code/*.o 2> /dev/null || true
 	@echo
