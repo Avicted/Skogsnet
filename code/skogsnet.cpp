@@ -247,7 +247,7 @@ write_measurement_to_file(Measurement measurement, f32 pidOut, f32 correctedOutp
 
     fprintf(fp, "%ld\t%f\t%f\t%f\t%f\n", measurement.Timestamp, measurement.TemperatureCelcius, measurement.Humidity, pidOut, correctedOutput);
 
-    printf("\tSuccessfully wrote to file: %ld\t%f\t%f\t%f\t%f\n", measurement.Timestamp, measurement.TemperatureCelcius, measurement.Humidity, pidOut, correctedOutput);
+    printf("\n\tSuccessfully wrote to file: output.dat\n");
 
     fclose(fp);
 }
