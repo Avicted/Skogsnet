@@ -5,7 +5,7 @@
 CC = clang
 
 # define any compile-time flags
-CPPFLAGS = -Wall -g -std=c++11 -fopenmp
+CPPFLAGS = -Wall -g -std=c++11 
 CPPFLAGS += -I/usr/include
 
 # define library paths in addition to /usr/lib
