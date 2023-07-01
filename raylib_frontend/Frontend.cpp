@@ -227,22 +227,38 @@ GameRender(f32 DeltaTime)
         BeginMode2D(MainCamera);
 
         {
-            // Draw a grid in dark grey in x and y axis with a dimension of 10 x 10, repeating over the whole screen
-            for (i32 i = 0; i < ScreenWidth; i += 50)
+            // Draw the grid lines
+            for (i32 i = -40; i <= 40; ++i)
             {
-                DrawLine(i, 0, i, ScreenHeight, DARKGRAY);
+                // Draw the bold lines
+                if (i % 5 == 0)
+                {
+                    DrawLine(0.1f * ScreenWidth, 0.9f * ScreenHeight - i * (0.8f * ScreenHeight / 40.0f), 0.9f * ScreenWidth, 0.9f * ScreenHeight - i * (0.8f * ScreenHeight / 40.0f), LIGHTGRAY);
+                }
+                else
+                {
+                    DrawLine(0.1f * ScreenWidth, 0.9f * ScreenHeight - i * (0.8f * ScreenHeight / 40.0f), 0.9f * ScreenWidth, 0.9f * ScreenHeight - i * (0.8f * ScreenHeight / 40.0f), DARKGRAY);
+                }
             }
 
-            for (i32 i = 0; i < ScreenHeight; i += 50)
+            // Draw the labels
+            for (i32 i = -40; i <= 40; ++i)
             {
-                DrawLine(0, i, ScreenWidth, i, DARKGRAY);
+                if (i % 5 == 0)
+                {
+                    char Label[16];
+                    sprintf(Label, "%d", i);
+                    DrawText(Label, ScreenWidth - (ScreenWidth / 16.0f), 0.9f * ScreenHeight - i * (0.8f * ScreenHeight / 40.0f), 16, WHITE);
+                }
             }
+        }
 
+        {
+            // Draw the data points
             for (i32 i = DataPointCount - 1; i >= 0; --i)
             {
                 i32 PosX = i * (1.0f * ScreenWidth / DataPointCount);
                 i32 PosY = DataPoints[i].TemperatureCelsius * (0.8f * ScreenHeight / 40.0f);
-                DrawPixel(PosX * 0.8f + 0.1f * ScreenWidth, 0.9f * ScreenHeight - PosY, RED);
 
                 // Draw lines between the points
                 if (i > 0)
@@ -254,7 +270,6 @@ GameRender(f32 DeltaTime)
                 }
 
                 PosY = DataPoints[i].HumidityPercent * (0.8f * ScreenHeight / 100.0f);
-                DrawPixel(PosX * 0.8f + 0.1f * ScreenWidth, 0.9f * ScreenHeight - PosY, GREEN);
 
                 if (i > 0)
                 {
@@ -301,7 +316,8 @@ GameRender(f32 DeltaTime)
     EndDrawing();
 }
 
-void CleanupOurStuff(void)
+internal void
+CleanupOurStuff(void)
 {
     CloseWindow(); // Close window and OpenGL context
 
