@@ -247,7 +247,7 @@ GameRender(f32 DeltaTime)
                 if (i % 5 == 0)
                 {
                     char Label[16];
-                    sprintf(Label, "%d", i);
+                    sprintf(Label, "%d°C", i);
                     DrawText(Label, ScreenWidth - (ScreenWidth / 16.0f), 0.9f * ScreenHeight - i * (0.8f * ScreenHeight / 40.0f), 16, WHITE);
                 }
             }
