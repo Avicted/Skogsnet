@@ -241,14 +241,14 @@ GameRender(f32 DeltaTime)
                 }
             }
 
-            // Draw the labels
+            // Draw the labels to the right
             for (i32 i = -40; i <= 40; ++i)
             {
                 if (i % 5 == 0)
                 {
                     char Label[16];
                     sprintf(Label, "%d°C", i);
-                    DrawText(Label, ScreenWidth - (ScreenWidth / 16.0f), 0.9f * ScreenHeight - i * (0.8f * ScreenHeight / 40.0f), 16, WHITE);
+                    DrawTextEx(MainFont, Label, (Vector2){0.9f * ScreenWidth + 5.0f, 0.9f * ScreenHeight - i * (0.8f * ScreenHeight / 40.0f) - 10.0f}, 10.0f, 0.0f, WHITE);
                 }
             }
         }
