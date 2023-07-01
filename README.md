@@ -32,7 +32,7 @@ Building and running the raylib frontend
 ./raylib_frontend/build.sh&
 
 Building the program
-clang -Wall -g -std=c++11 -fopenmp -I/usr/include -o ./build/skogsnet_v0.0.2 ./code/PID.cpp ./code/skogsnet.cpp -L /usr/lib -fopenmp -lstdc++ -lm
+clang -Wall -g -std=c++11 -fopenmp -I/usr/include -o ./build/skogsnet_v0.0.3 ./code/PID.cpp ./code/skogsnet.cpp -L /usr/lib -fopenmp -lstdc++ -lm
 Compiling raylib_frontend
 
 -- Testing if -Werror=pointer-arith can be used -- compiles
@@ -53,9 +53,9 @@ make[1]: Entering directory '/home/avic/projects/Skogsnet/build'
 [ 70%] Built target glfw
 [ 94%] Built target raylib
 [ 97%] Building CXX object CMakeFiles/Frontend.dir/Frontend.cpp.o
-./build/skogsnet_v0.0.2
+./build/skogsnet_v0.0.3
 	Settings up time measurement and serial communications...
-./build/skogsnet_v0.0.2
+./build/skogsnet_v0.0.3
 
       Trying port: /dev/ttyACM0
 
