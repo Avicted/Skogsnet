@@ -153,7 +153,7 @@ deserialize_JSON(char *buffer)
 
         // parse and serialize JSON
         json j_complete = json::parse(ss);
-        std::cout << std::setw(4) << j_complete << "\n\n";
+        // std::cout << std::setw(4) << j_complete << "\n\n";
 
         int64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
@@ -382,6 +382,7 @@ int main(int argc, char *argv[])
         printf("\tPID computation total run time: (s): %lf\n", (time_end - pid_time_start));
         printf("\tPID computation total run time (ms): %lf\n", (time_end - pid_time_start) * 1000.);
         printf("\tPID computation total run time (μS): %lf\n", (time_end - pid_time_start) * 1000000.);
+        printf("----------------------------------------------------------\n");
     }
 
     print_performance_metrics();
