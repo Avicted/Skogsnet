@@ -76,22 +76,22 @@ HandleWindowResize(void)
 internal void
 HandleCameraZoom(void)
 {
-    // zoom based on wheel
-    f32 wheel = GetMouseWheelMove();
+    // Zoom based on wheel
+    f32 Wheel = GetMouseWheelMove();
 
-    if (wheel != 0)
+    if (Wheel != 0)
     {
         // get the world point that is under the mouse
-        Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), MainCamera);
+        Vector2 MouseWorldPos = GetScreenToWorld2D(GetMousePosition(), MainCamera);
 
         // set the offset to where the mouse is
         MainCamera.offset = GetMousePosition();
 
         // set the target to match, so that the camera maps the world space point under the cursor to the screen space point under the cursor at any zoom
-        MainCamera.target = mouseWorldPos;
+        MainCamera.target = MouseWorldPos;
 
         // zoom
-        MainCamera.zoom += wheel * 0.125f;
+        MainCamera.zoom += Wheel * 0.125f;
         if (MainCamera.zoom < 0.125f)
         {
             MainCamera.zoom = 0.125f;
@@ -206,10 +206,10 @@ GameUpdate(f32 DeltaTime)
         // translate based on right click
         if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         {
-            Vector2 delta = GetMouseDelta();
-            delta = Vector2Scale(delta, -1.0f / MainCamera.zoom);
+            Vector2 Delta = GetMouseDelta();
+            Delta = Vector2Scale(Delta, -1.0f / MainCamera.zoom);
 
-            MainCamera.target = Vector2Add(MainCamera.target, delta);
+            MainCamera.target = Vector2Add(MainCamera.target, Delta);
         }
     }
 
