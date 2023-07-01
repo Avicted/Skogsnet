@@ -276,7 +276,7 @@ GameRender(f32 DeltaTime)
 
     DataPoint *DataPoint = &DataPoints[DataPointCount - 1];
     char TempText[256];
-    sprintf(TempText, "Temperature: %f", DataPoint->TemperatureCelsius);
+    sprintf(TempText, "Temperature: %f°C", DataPoint->TemperatureCelsius);
     DrawTextEx(MainFont, TempText, {10, 40}, 20, 2, DARKGRAY);
 
     DrawTextEx(MainFont, TempText, {12, 42}, 20, 2, RED);
