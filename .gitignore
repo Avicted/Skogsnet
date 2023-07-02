@@ -6,5 +6,5 @@ build/
 result.out
 /**/*.o
 *.o
-output.dat
+# output.dat
 output_old.dat
