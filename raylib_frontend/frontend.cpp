@@ -361,8 +361,8 @@ internal void
 GameRender(f32 DeltaTime)
 {
     // Define view window size and zoom factor
-    static f32 zoomFactor = 1.0f;
-    static i32 scrollOffset = 0;
+    local_persist f32 zoomFactor = 1.0f;
+    local_persist i32 scrollOffset = 0;
 
     // Update view window indices
     usize StartIndex, EndIndex;
