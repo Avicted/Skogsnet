@@ -22,8 +22,8 @@ std::string portname = "/dev/ttyACM";
 internal f32
 PIDSystem_Update(f32 inp)
 {
-    static f32 output = 0.0f;
-    static const f32 alpha = 0.02f;
+    local_persist f32 output = 0.0f;
+    local_persist const f32 alpha = 0.02f;
 
     output = (SAMPLE_TIME_S * inp + output) / (1.0f + alpha * SAMPLE_TIME_S);
 
