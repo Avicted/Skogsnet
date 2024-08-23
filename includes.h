@@ -1,28 +1,30 @@
 #pragma once
 
-// Standard library
-#include <iostream>
-#include <memory>
-#include <ctime>
-#include <cstring>
-#include <time.h>
-#include <string>
-#include <cmath>
-#include <signal.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/time.h>
-#include <algorithm>
-#include <fstream>
-#include <random>
-#include <climits>
-#include <sstream>
-#include <errno.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <unistd.h>
-#include <chrono>
+// Standard C++ library headers
+#include <iostream>  // For input/output stream operations
+#include <memory>    // For smart pointers like std::unique_ptr and std::shared_ptr
+#include <ctime>     // For time manipulation (C-style time handling)
+#include <cstring>   // For C-style string manipulation (e.g., strcmp, strcpy)
+#include <time.h>    // For time functions and structures (similar to <ctime>)
+#include <string>    // For std::string and string manipulation
+#include <cmath>     // For common mathematical functions like sqrt, sin, cos
+#include <algorithm> // For standard algorithms like std::sort, std::find
+#include <fstream>   // For file input/output stream operations
+#include <random>    // For random number generation facilities
+#include <climits>   // For limits of integral types (e.g., INT_MAX)
+#include <sstream>   // For string stream classes (std::stringstream)
+#include <chrono>    // For high-precision time utilities
+
+// POSIX headers (Portable Operating System Interface)
+#include <errno.h>    // For error handling (defines errno)
+#include <termios.h>  // For terminal I/O interfaces
+#include <unistd.h>   // For access to the POSIX operating system API (e.g., sleep, fork)
+#include <fcntl.h>    // For file control options (e.g., open, O_RDONLY)
+#include <math.h>     // For mathematical functions (C-style, similar to <cmath>)
+#include <stdio.h>    // For standard input/output functions (C-style, e.g., printf, scanf)
+#include <stdlib.h>   // For standard library functions like malloc, free, exit
+#include <signal.h>   // For signal handling (e.g., SIGKILL, SIGINT)
+#include <sys/time.h> // For time functions and structures (e.g., gettimeofday)
 
 // Third party
 #include "code/json.hpp"

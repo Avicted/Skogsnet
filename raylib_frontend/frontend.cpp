@@ -3,10 +3,14 @@
 
 i32 ScreenWidth = 640 * 2;
 i32 ScreenHeight = 360 * 2;
+
 bool Debug = false;
+
 global_variable i64 CPUMemory = 0L;
+
 usize DataPointCount = 0;
 const char *DataFilePath = "./output.dat";
+
 Camera2D MainCamera;
 Font MainFont;
 
