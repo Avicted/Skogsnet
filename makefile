@@ -11,7 +11,7 @@ CPPFLAGS += -I/usr/include
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
-LDFLAGS 	 	:= -fopenmp -lstdc++ -lm
+LDFLAGS 	 	:= -lstdc++ -lm
 LDLIBS   		:= -L /usr/lib
 
 SRC_DIR 	:= ./code
@@ -21,9 +21,9 @@ INCLUDES    := $(wildcard $(SRC_DIR)/*.hpp)
 OBJ_FILES   := $(SRC_FILES:.cpp=.o)
 
 # define the executable file 
-TARGET = skogsnet_v0.0.3
+TARGET = skogsnet_v0.0.4
 
-all: dirs raylibfrontend $(TARGET) 
+all: dirs raylibfrontend $(TARGET)
 	@echo
 	@echo        The Serial Temperature and Humidity reader program has been built and runned successfully!
 	@echo 

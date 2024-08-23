@@ -10,6 +10,9 @@ const char *DataFilePath = "./output.dat";
 Camera2D MainCamera = {0};
 Font MainFont = {0};
 
+// Maximum data points 1 billion
+const unsigned long long MAX_DATA_POINTS = 1000000000ULL;
+
 struct DataPoint
 {
     u32 UnixTimestamp;
@@ -136,7 +139,7 @@ ReadDataFromFile(const char *FileName)
 internal void
 PrintData(void)
 {
-    for (usize i = 0; i < 10000000ULL; ++i)
+    for (usize i = 0; i < MAX_DATA_POINTS; ++i)
     {
         DataPoint *DataPoint = &DataPoints[i];
         printf("\tDataPoint[%llu]: UnixTimestamp: %llu, TemperatureCelsius: %f, HumidityPercent: %f\n", i, DataPoint->UnixTimestamp, DataPoint->TemperatureCelsius, DataPoint->HumidityPercent);
@@ -284,7 +287,7 @@ GameRender(f32 DeltaTime)
 
     EndMode2D();
 
-    const char *ProgramVersion = "Skogsnet_v0.0.3";
+    const char *ProgramVersion = "Skogsnet_v0.0.4";
     DrawTextEx(MainFont, ProgramVersion, {10, 10}, 20, 2, DARKGRAY);
 
     DrawTextEx(MainFont, ProgramVersion, {12, 12}, 20, 2, ORANGE);
@@ -326,8 +329,8 @@ CleanupOurStuff(void)
 
     free(DataPoints);
 
-    CPUMemory -= 10000000ULL * sizeof(DataPoint);
-    printf("Freeing DataPoints: %llu\n", 10000000ULL * sizeof(DataPoint));
+    CPUMemory -= MAX_DATA_POINTS * sizeof(DataPoint);
+    printf("Freeing DataPoints: %llu\n", MAX_DATA_POINTS * sizeof(DataPoint));
 }
 
 internal void
@@ -363,8 +366,8 @@ int main(int argc, char **argv)
     MainCamera.zoom = 1.0f;
     MainFont = LoadFontEx("./build/fonts/Super Mario Bros. 2.ttf", 32, 0, 250);
 
-    DataPoints = (DataPoint *)calloc(10000000ULL, sizeof(DataPoint));
-    CPUMemory += 10000000ULL * sizeof(DataPoint);
+    DataPoints = (DataPoint *)calloc(MAX_DATA_POINTS, sizeof(DataPoint));
+    CPUMemory += MAX_DATA_POINTS * sizeof(DataPoint);
 
     ReadDataFromFile(DataFilePath);
 
