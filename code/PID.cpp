@@ -10,7 +10,29 @@ void PIDControllerInitialize(PIDController *pid)
     pid->differentiator = 0.0f;
     pid->prevMeasurement = 0.0f;
 
-    pid->out = 0.0f;
+    // Tune with Siegler-Nichols method
+    // pid->Kp = 0.6f * Ku;
+    // pid->Ki = 1.2f * Ku / Tu;
+    // pid->Kd = 3.0f * Ku * Tu / 40.0f;
+
+    // Set gains
+    pid->Kp = 2.0f;
+    pid->Ki = 0.5f;
+    pid->Kd = 0.25f;
+
+    // Set time constant
+    pid->tau = 0.02f;
+
+    // Set output limits
+    pid->limMin = -10.0f;
+    pid->limMax = 10.0f;
+
+    // Set integrator limits
+    pid->limMinInt = -5.0f;
+    pid->limMaxInt = 5.0f;
+
+    // Set sample time
+    pid->T = 0.001f;
 }
 
 float PIDControllerUpdate(PIDController *pid, float setpoint, float measurement)
@@ -37,12 +59,10 @@ float PIDControllerUpdate(PIDController *pid, float setpoint, float measurement)
 
     if (pid->out > pid->limMax)
     {
-
         pid->out = pid->limMax;
     }
     else if (pid->out < pid->limMin)
     {
-
         pid->out = pid->limMin;
     }
 

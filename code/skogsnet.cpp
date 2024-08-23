@@ -1,12 +1,6 @@
 #include "../Includes.h"
 #include "PID.hpp"
 
-// Cpp spec does shenanigans with the usage of <static>, let's be explicit in what
-// we mean with 'static'
-#define internal static
-#define local_persist static
-#define global_variable static
-
 // Program constants ------------------------------------------------
 global_variable long int MemoryAllocatedCPU = 0L;
 global_variable const f32 PI = acos(-1);
@@ -15,22 +9,10 @@ global_variable struct timezone _tzone;
 global_variable f64 program_time_start;
 global_variable bool running;
 
+// PID controller
+global_variable const f64 SAMPLE_TIME_S = 0.001;
+
 std::string portname = "/dev/ttyACM";
-
-// PID Controller parameters
-#define PID_KP 2.0f
-#define PID_KI 0.5f
-#define PID_KD 0.25f
-
-#define PID_TAU 0.02f
-
-#define PID_LIM_MIN -10.0f
-#define PID_LIM_MAX 10.0f
-
-#define PID_LIM_MIN_INT -5.0f
-#define PID_LIM_MAX_INT 5.0f
-
-#define SAMPLE_TIME_S 0.001
 
 // Maximum run-time of simulation
 #define SIMULATION_TIME_MAX 1.0
@@ -191,7 +173,6 @@ internal void
 initialize_serialCommunication(int fd, unsigned int connectionAttempts, unsigned int maxConnectionAttempts)
 {
     // Read data from the Arduinos Serial port in the Linux host
-    // Let us try five ports lol
     std::string portnameString = portname + std::to_string(connectionAttempts);
     fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC); // file descriptor
 
@@ -254,7 +235,7 @@ write_measurement_to_file(Measurement measurement, f32 pidOut, f32 correctedOutp
 
 int main(int argc, char *argv[])
 {
-    printf("\tSettings up time measurement and serial communications...\n");
+    printf("\tSetting up time measurement and serial communications...\n");
 
     // Time measurement
     gettimeofday(&_ttime, &_tzone);
@@ -273,116 +254,115 @@ int main(int argc, char *argv[])
     }
 
     // Read data from the Arduinos Serial port in the Linux host
-    // Let us try five ports lol
-    unsigned int connectionAttempts = 0;
-    unsigned int maxConnectionAttempts = 5;
+    const unsigned int connectionAttempts = 0;
+    const unsigned int maxConnectionAttempts = 5;
     std::string portnameString = portname + std::to_string(connectionAttempts);
     int fd = open(portnameString.c_str(), O_RDWR | O_NOCTTY | O_SYNC); // file descriptor
 
     initialize_serialCommunication(fd, connectionAttempts, maxConnectionAttempts);
 
     // Initialise PID controller
-    PIDController pid = {
-        PID_KP,
-        PID_KI,
-        PID_KD,
-        PID_TAU,
-        PID_LIM_MIN,
-        PID_LIM_MAX,
-        PID_LIM_MIN_INT,
-        PID_LIM_MAX_INT,
-        SAMPLE_TIME_S,
-    };
-
+    PIDController pid = {};
     PIDControllerInitialize(&pid);
 
     // Simulate response using test system
-    f32 setpoint = 20.0f;
+    const f32 SetPointCelcius = 20.0f;
+
+    const f64 TimeToWaitInSeconds = 1.0;
+    f64 lastMeasurementTime = program_time_start;
 
     // Main loop
     running = true;
     while (running)
     {
-        // Read data ---------------------------------------------------
-        unsigned int bufferSize = 256;
-        char buffer[256] = {0};
-        unsigned int pos = 0;
+        // Get the current time
+        gettimeofday(&_ttime, &_tzone);
+        f64 CurrentTime = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
 
-        MemoryAllocatedCPU += 1L * bufferSize * sizeof(char);
-
-        usleep(10000);
-
-        // Read 1 byte at a time from the serial port
-        while (read(fd, buffer + pos, 1))
+        // Check if 1 second has passed since the last measurement
+        if ((CurrentTime - lastMeasurementTime) >= TimeToWaitInSeconds)
         {
-            if (pos >= bufferSize)
+            lastMeasurementTime = CurrentTime;
+
+            // Read data ---------------------------------------------------
+            unsigned int bufferSize = 256;
+            char buffer[256] = {0};
+            unsigned int pos = 0;
+
+            MemoryAllocatedCPU += 1L * bufferSize * sizeof(char);
+
+            // Read 1 byte at a time from the serial port
+            while (read(fd, buffer + pos, 1))
+            {
+                if (pos >= bufferSize)
+                {
+                    continue;
+                }
+                if (buffer[pos] == '\n')
+                {
+                    break;
+                }
+
+                ++pos;
+            }
+
+            // Check for an empty buffer
+            if (strlen(buffer) == 0)
             {
                 continue;
             }
-            if (buffer[pos] == '\n')
+
+            // Deserialize data -----------------------------------------------
+            Measurement newMeasurement = deserialize_JSON(buffer);
+
+            // PID control based on the data ------------------------------
+            gettimeofday(&_ttime, &_tzone);
+            f64 pid_time_start = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
+
+            printf("\n        Time (s)\tSystem Output\t\tControllerOutput\tCorrectedOutput\r\n");
+            unsigned long int steps = 0;
+
+            for (f32 t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
             {
-                break;
-            }
+                if (t > SIMULATION_TIME_MAX)
+                {
+                    break;
+                }
 
-            ++pos;
-        }
+                // Get measurement from the system
+                f32 correctedOutput = PIDSystem_Update(pid.out);
 
-        // Check for an empty buffer
-        if (strlen(buffer) == 0)
-        {
-            continue;
-        }
+                // Compute new control signal
+                PIDControllerUpdate(&pid, SetPointCelcius, newMeasurement.TemperatureCelcius);
 
-        // Deserialize data -----------------------------------------------
-        Measurement newMeasurement = deserialize_JSON(buffer);
+                if (t == 0)
+                {
+                    printf("        t: %f\tmeasurement: %f\tpid.out: %f\tcorrectedOutput: %f\r\n", t, newMeasurement.TemperatureCelcius, pid.out, correctedOutput);
+                    write_measurement_to_file(newMeasurement, pid.out, correctedOutput);
+                }
 
-        // PID control the based on the data ------------------------------
-        gettimeofday(&_ttime, &_tzone);
-        f64 pid_time_start = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
+                gettimeofday(&_ttime, &_tzone);
+                f64 time_end = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
+                if (pid_time_start - time_end >= 1.0)
+                {
+                    printf("        Warning: PID computation took too long time_end: %lf!\n", pid_time_start - time_end);
+                    printf("        t: %f\n", t);
+                    break;
+                }
 
-        printf("\n        Time (s)\tSystem Output\t\tControllerOutput\tCorrectedOutput\r\n");
-        unsigned long int steps = 0;
-
-        for (f32 t = 0.0f; t <= SIMULATION_TIME_MAX; t += SAMPLE_TIME_S)
-        {
-            if (t > SIMULATION_TIME_MAX)
-            {
-                break;
-            }
-
-            // Get measurement from system
-            f32 correctedOutput = PIDSystem_Update(pid.out);
-
-            // Compute new control signal
-            PIDControllerUpdate(&pid, setpoint, newMeasurement.TemperatureCelcius);
-
-            if (t == 0)
-            {
-                printf("        t: %f\tmeasurement: %f\tpid.out: %f\tcorrectedOutput: %f\r\n", t, newMeasurement.TemperatureCelcius, pid.out, correctedOutput);
-                write_measurement_to_file(newMeasurement, pid.out, correctedOutput);
+                ++steps;
             }
 
             gettimeofday(&_ttime, &_tzone);
             f64 time_end = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
-            if (pid_time_start - time_end >= 1.0)
-            {
-                printf("        Warning: PID computation took too long time_end: %lf!\n", pid_time_start - time_end);
-                printf("        t: %f\n", t);
-                break;
-            }
 
-            ++steps;
+            unsigned long int totalSteps = (f64)SIMULATION_TIME_MAX / (f64)SAMPLE_TIME_S;
+            printf("\n\tSimulated %ld steps out of %ld total steps\n", steps - 1, totalSteps);
+            printf("\tPID computation total run time: (s): %lf\n", (time_end - pid_time_start));
+            printf("\tPID computation total run time (ms): %lf\n", (time_end - pid_time_start) * 1000.);
+            printf("\tPID computation total run time (μS): %lf\n", (time_end - pid_time_start) * 1000000.);
+            printf("----------------------------------------------------------\n");
         }
-
-        gettimeofday(&_ttime, &_tzone);
-        f64 time_end = (f64)_ttime.tv_sec + (f64)_ttime.tv_usec / 1000000.;
-
-        unsigned long int totalSteps = (f64)SIMULATION_TIME_MAX / (f64)SAMPLE_TIME_S;
-        printf("\n\tSimulated %ld steps out of %ld total steps\n", steps - 1, totalSteps);
-        printf("\tPID computation total run time: (s): %lf\n", (time_end - pid_time_start));
-        printf("\tPID computation total run time (ms): %lf\n", (time_end - pid_time_start) * 1000.);
-        printf("\tPID computation total run time (μS): %lf\n", (time_end - pid_time_start) * 1000000.);
-        printf("----------------------------------------------------------\n");
     }
 
     print_performance_metrics();
