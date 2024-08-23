@@ -1,4 +1,4 @@
-#include "../Includes.h"
+#include "../includes.h"
 #include "PID.hpp"
 
 // Program constants ------------------------------------------------
@@ -12,6 +12,7 @@ global_variable bool running;
 // PID controller
 global_variable const f64 SAMPLE_TIME_S = 0.001;
 
+// Serial port for the Arduino
 std::string portname = "/dev/ttyACM";
 
 // Maximum run-time of simulation
@@ -200,7 +201,7 @@ initialize_serialCommunication(int fd, unsigned int connectionAttempts, unsigned
         connectionAttempts = 1000;
 
         set_interface_attribs(fd, B115200, 0); // set speed to 115200 bps, 8n1 (no parity)
-        set_blocking(fd, 0);                   // set no blocking
+        set_blocking(fd, 0);
     }
 
     printf("\n        Skogsnet is running now, connected to port: %s\n\n", portnameString.c_str());
