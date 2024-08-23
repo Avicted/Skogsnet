@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.11) # FetchContent is available in 3.11+
 
-project(Frontend VERSION 0.1.0 LANGUAGES CXX)
+project(Frontend VERSION 0.2.0 LANGUAGES CXX)
 
 if (POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
@@ -38,12 +38,13 @@ add_git_dependency(
     raylib
     https://github.com/raysan5/raylib.git
     4.5.0
-)
+
+
 
 # -------------------------------------------------------------------------------------
 
 # Our Project
-add_executable(${PROJECT_NAME} Frontend.cpp)
+add_executable(${PROJECT_NAME} frontend.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 # -------------------------------------------------------------------------------------

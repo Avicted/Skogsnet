@@ -1,6 +1,5 @@
 #pragma once
 
-// Reference additional headers your program requires here.
 #include "raylib.h"
 #include "rlgl.h"
 #include "raymath.h"

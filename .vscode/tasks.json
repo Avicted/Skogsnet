@@ -1,0 +1,53 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Create build directory",
+            "command": "mkdir",
+            "args": [
+                "-p",
+                "${workspaceFolder}/build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "detail": "Create the build directory before building"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc build active file",
+            "command": "/usr/bin/gcc",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "./raylib_frontend/frontend.cpp",
+                "-o",
+                "./build/raylibfrontend",
+                "-lraylib",
+                "-lstdc++",
+                "-lm",
+                "-lpthread",
+                "-ldl",
+                "-lrt",
+                "-lX11",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "Build the Raylib frontend",
+        },
+        {
+            "label": "Build",
+            "dependsOn": [
+                "Create build directory",
+                "C/C++: gcc build active file",
+            ],
+        },
+    ],
+    "version": "2.0.0"
+}
