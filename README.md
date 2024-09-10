@@ -41,13 +41,26 @@ make -j 2 skogsnet raylibfrontend
 
 ## Skogsnet output
 ```bash
-> make skogsnet_v0.0.4                                     %
+> make -j 2 skogsnet raylibfrontend
+g++  -O0 -g -Wall -std=c++11 -Wno-narrowing -I/usr/include  -c -o code/skogsnet.o code/skogsnet.cpp
+
+Creating directories
+mkdir -p build
+mkdir -p ./raylib_frontend/build
+
+Building the and running raylib frontend
+g++ -O0 -g -Wall -std=c++11 -Wno-narrowing -I/usr/include -o ./raylib_frontend/build/raylibfrontend ./raylib_frontend/frontend.cpp -L /usr/lib -lstdc++ -lm  -lraylib -lm -lpthread
+./raylib_frontend/build/raylibfrontend
+	No input args OK!
+	Current working directory: /home/avic/projects/Skogsnet
+	Hello from raylib_frontend!
+	Successfully read data points from file! Total points in buffer: 100000
 
 Building the program
-clang -Wall -g -std=c++11  -I/usr/include -o ./build/skogsnet_v0.0.4 ./code/PID.cpp ./code/skogsnet.cpp -L /usr/lib -lstdc++ -lm
-./build/skogsnet_v0.0.4
+g++ -O0 -g -Wall -std=c++11 -Wno-narrowing -I/usr/include -o ./build/skogsnet ./code/PID.cpp ./code/skogsnet.cpp -L /usr/lib -lstdc++ -lm 
+./build/skogsnet
 	Setting up time measurement and serial communications...
-./build/skogsnet_v0.0.4
+./build/skogsnet
 
       Trying port: /dev/ttyACM0
 
@@ -55,78 +68,35 @@ clang -Wall -g -std=c++11  -I/usr/include -o ./build/skogsnet_v0.0.4 ./code/PID.
 
 
         Measurement:
-        Timestamp:		1724430827844
-        TemperatureCelcius:	23.250000
-        Humidity:		83.937500
-
-        Time (s)	System Output		ControllerOutput	CorrectedOutput
-        t: 0.000000	measurement: 23.250000	pid.out: -10.000000	correctedOutput: 0.000000
+        Timestamp:		1725985596922
+        TemperatureCelcius:	23.656250
+        Humidity:		80.812500
 
 	Successfully wrote to file: output.dat
-
-	Simulated 1000 steps out of 1000 total steps
-	PID computation total run time: (s): 0.000101
-	PID computation total run time (ms): 0.100851
-	PID computation total run time (μS): 100.851059
-----------------------------------------------------------
 
         Measurement:
-        Timestamp:		1724430832844
-        TemperatureCelcius:	23.250000
-        Humidity:		83.812500
-
-        Time (s)	System Output		ControllerOutput	CorrectedOutput
-        t: 0.000000	measurement: 23.250000	pid.out: -10.000000	correctedOutput: -9.247562
+        Timestamp:		1725985602463
+        TemperatureCelcius:	23.625000
+        Humidity:		80.875000
 
 	Successfully wrote to file: output.dat
 
-	Simulated 1000 steps out of 1000 total steps
-	PID computation total run time: (s): 0.000175
-	PID computation total run time (ms): 0.174999
-	PID computation total run time (μS): 174.999237
-----------------------------------------------------------
 
-        Measurement:
-        Timestamp:		1724430837852
-        TemperatureCelcius:	23.250000
-        Humidity:		83.875000
+^C	Caught SIGINT, exiting peacefully!
 
-        Time (s)	System Output		ControllerOutput	CorrectedOutput
-        t: 0.000000	measurement: 23.250000	pid.out: -10.000000	correctedOutput: -18.974636
-
-	Successfully wrote to file: output.dat
-
-	Simulated 1000 steps out of 1000 total steps
-	PID computation total run time: (s): 0.000125
-	PID computation total run time (ms): 0.124931
-	PID computation total run time (μS): 124.931335
-----------------------------------------------------------
-
-        Measurement:
-        Timestamp:		1724430842916
-        TemperatureCelcius:	23.218750
-        Humidity:		83.875000
-
-        Time (s)	System Output		ControllerOutput	CorrectedOutput
-        t: 0.000000	measurement: 23.218750	pid.out: -10.000000	correctedOutput: -28.508919
-
-	Successfully wrote to file: output.dat
-
-	Simulated 1000 steps out of 1000 total steps
-	PID computation total run time: (s): 0.000164
-	PID computation total run time (ms): 0.163794
-	PID computation total run time (μS): 163.793564
-----------------------------------------------------------
-^C
         dummy: 2
         Exiting successfully.
+	Memory used in GigaBytes: 0.001118
+	Memory used in MegaBytes: 1.144409
+
+Freeing DataPoints: 1200000
 
         [Performance Metrics]
         Total memory allocated 		 = 0.0 MB
-        Current Wall clock run time 	 = 16.7 secs
+        Current Wall clock run time 	 = 9.0 secs
 ```
 
-## Frontend
+## Raylib Frontend
 
 ![screenshot.png](screenshot.png "Frontend")
 
