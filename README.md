@@ -36,7 +36,7 @@ sudo pacman -S raylib nlohmann-json base-devel cmake
 _How to start both programs._
 
 ```shell
-make
+make -j 2 skogsnet raylibfrontend
 ```
 
 ## Skogsnet output
