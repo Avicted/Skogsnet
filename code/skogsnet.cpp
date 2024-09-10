@@ -10,6 +10,7 @@ global_variable f64 program_time_start;
 global_variable bool running;
 
 // PID controller
+global_variable bool usePIDController = false; // Set to true to use the PID controller
 global_variable const f64 SAMPLE_TIME_S = 0.001;
 
 // Serial port for the Arduino
@@ -130,11 +131,9 @@ deserialize_JSON(char *buffer)
     // JSON deserializer
     try
     {
-        // fill a stream with JSON text
         std::stringstream ss = std::stringstream();
         ss << buffer;
 
-        // parse and serialize JSON
         json j_complete = json::parse(ss);
         // std::cout << std::setw(4) << j_complete << "\n\n";
 
@@ -315,6 +314,15 @@ int main(int argc, char *argv[])
 
             // Deserialize data -----------------------------------------------
             Measurement newMeasurement = deserialize_JSON(buffer);
+
+            if (usePIDController == false)
+            {
+                f32 correctedOutput = 0.0f;
+                f32 pidOut = 0.0f;
+                write_measurement_to_file(newMeasurement, pidOut, correctedOutput);
+
+                continue;
+            }
 
             // PID control based on the data ------------------------------
             gettimeofday(&_ttime, &_tzone);

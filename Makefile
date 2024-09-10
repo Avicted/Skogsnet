@@ -5,7 +5,7 @@
 CC = g++
 
 # define any compile-time flags
-CPPFLAGS = -O0 -g -Wall -std=c++11 
+CPPFLAGS = -O0 -g -Wall -std=c++11 -Wno-narrowing
 CPPFLAGS += -I/usr/include
 
 # define library paths in addition to /usr/lib
@@ -21,9 +21,9 @@ INCLUDES    := $(wildcard $(SRC_DIR)/*.hpp)
 OBJ_FILES   := $(SRC_FILES:.cpp=.o)
 
 # define the executable file 
-TARGET = skogsnet_v0.0.4
+TARGET = skogsnet
 
-all: dirs raylibfrontend $(TARGET)
+all: dirs $(TARGET) raylibfrontend 
 	@echo
 	@echo        The Serial Temperature and Humidity reader program has been built and runned successfully!
 	@echo 

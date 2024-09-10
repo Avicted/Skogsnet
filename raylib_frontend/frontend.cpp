@@ -1,6 +1,10 @@
 #include "../includes.h"
 #include "raylib_includes.h"
 
+// --------------------------------------------------------
+#define SCREEN_WIDTH 640 * 2
+#define SCREEN_HEIGHT 360 * 2
+
 i32 ScreenWidth = 640 * 2;
 i32 ScreenHeight = 360 * 2;
 
@@ -13,6 +17,7 @@ const char *DataFilePath = "./output.dat";
 
 Camera2D MainCamera;
 Font MainFont;
+const f64 ScalingFactor = 0.90;
 
 struct DataPoint
 {
@@ -57,7 +62,7 @@ const Color TEMP_LABEL_COLOR = RED;
 const Color HUMIDITY_LABEL_COLOR = GREEN;
 
 // Define X position for labels
-const f32 LABEL_X_POS = 0.9f * ScreenWidth + 5.0f;
+const f32 LABEL_X_POS = ScalingFactor * ScreenWidth + 5.0f;
 
 // --------------------------------------------------------
 
@@ -350,15 +355,22 @@ GameUpdate(f32 DeltaTime)
 internal f32
 MapTemperatureToScreen(f32 temperature)
 {
+    // Clamp temperature to the defined range
     temperature = fmaxf(MIN_TEMP, fminf(MAX_TEMP, temperature));
-    return (temperature - MIN_TEMP) / (MAX_TEMP - MIN_TEMP) * (0.8f * ScreenHeight);
+
+    // Map temperature to the screen height range
+    // Higher temperatures should appear higher on the screen
+    return -(temperature - MIN_TEMP) / (MAX_TEMP - MIN_TEMP) * (0.8f * ScreenHeight) + 0.1f * ScreenHeight;
 }
 
 internal f32
 MapHumidityToScreen(f32 humidity)
 {
+    // Clamp humidity to the defined range
     humidity = fmaxf(MIN_HUMIDITY, fminf(MAX_HUMIDITY, humidity));
-    return (humidity - MIN_HUMIDITY) / (MAX_HUMIDITY - MIN_HUMIDITY) * (0.8f * ScreenHeight);
+
+    // Map humidity to screen coordinates with 100% at the top and 0% at the bottom
+    return -(humidity - MIN_HUMIDITY) / (MAX_HUMIDITY - MIN_HUMIDITY) * (0.8f * ScreenHeight) + 0.1f * ScreenHeight;
 }
 
 internal void
@@ -382,16 +394,9 @@ GameRender(f32 DeltaTime)
         // Draw the grid lines for temperature and humidity
         for (i32 i = MIN_TEMP; i <= MAX_TEMP; ++i)
         {
-            f32 lineY = roundf(0.9f * ScreenHeight - MapTemperatureToScreen(i));
+            f32 lineY = roundf(MapTemperatureToScreen(i));
             Color lineColor = (i % 5 == 0) ? LIGHTGRAY : DARKGRAY;
-            DrawLine((i32)(0.1f * ScreenWidth), (i32)lineY, (i32)(0.9f * ScreenWidth), (i32)lineY, lineColor);
-        }
-
-        for (i32 i = MIN_HUMIDITY; i <= MAX_HUMIDITY; i += 10)
-        {
-            f32 lineY = roundf(0.9f * ScreenHeight - MapHumidityToScreen(i));
-            Color lineColor = (i % 20 == 0) ? LIGHTGRAY : DARKGRAY;
-            DrawLine((i32)(0.1f * ScreenWidth), (i32)lineY, (i32)(0.9f * ScreenWidth), (i32)lineY, lineColor);
+            DrawLine((i32)(0.1f * ScreenWidth), (i32)lineY, (i32)(ScalingFactor * ScreenWidth), (i32)lineY, lineColor);
         }
 
         // Draw temperature labels on the right side
@@ -401,50 +406,62 @@ GameRender(f32 DeltaTime)
             {
                 char Label[16];
                 sprintf(Label, "%d°C", i);
-                f32 textY = roundf(0.9f * ScreenHeight - MapTemperatureToScreen(i) - 10.0f);
-                DrawTextEx(MainFont, Label, {(f32)(0.9f * ScreenWidth + 5.0f), textY}, 10.0f, 0.0f, TEMP_LABEL_COLOR);
+                f32 textY = roundf(MapTemperatureToScreen(i) - 10.0f);
+                DrawTextEx(MainFont, Label, {(f32)(0.9f * ScreenWidth + 5.0f), textY}, 16.0f, 0.0f, TEMP_LABEL_COLOR);
             }
         }
 
         // Draw humidity labels on the right side
         for (i32 i = MIN_HUMIDITY; i <= MAX_HUMIDITY; i += 10)
         {
-            if (i % 5 == 0)
+            if (i % 10 == 0) // Adjusted to match the increments in the grid
             {
                 char Label[16];
                 sprintf(Label, "%d%%", i);
-                f32 textY = roundf(0.9f * ScreenHeight - MapHumidityToScreen(i) - 10.0f);
-                DrawTextEx(MainFont, Label, {(f32)(0.9f * ScreenWidth + 50.0f), textY}, 10.0f, 0.0f, HUMIDITY_LABEL_COLOR);
+                f32 textY = roundf(MapHumidityToScreen(i) - 10.0f);
+                DrawTextEx(MainFont, Label, {(f32)(ScalingFactor * ScreenWidth + 75.0f), textY}, 16.0f, 0.0f, HUMIDITY_LABEL_COLOR);
             }
         }
 
         // Draw the data points from the end (newest) backwards
-        for (usize i = EndIndex; i != StartIndex; i = (i - 1 + DataBuffer->Capacity) % DataBuffer->Capacity)
-        {
-            usize PrevIndex = (i - 1 + DataBuffer->Capacity) % DataBuffer->Capacity;
-            DataPoint *Point = &DataBuffer->Buffer[i];
-            DataPoint *PrevPoint = &DataBuffer->Buffer[PrevIndex];
+        // Adjust these as needed for the buffer
+        usize CurrentIndex = StartIndex;
+        usize NextIndex = (StartIndex + 1) % DataBuffer->Capacity;
 
-            i32 PosX = (i32)roundf((EndIndex - i) * (1.0f * ScreenWidth / VIEW_WINDOW_SIZE));
-            i32 TempPosY = (i32)roundf(0.9f * ScreenHeight - MapTemperatureToScreen(Point->TemperatureCelsius));
-            i32 HumidPosY = (i32)roundf(0.9f * ScreenHeight - MapHumidityToScreen(Point->HumidityPercent));
+        // Draw the data points from StartIndex to EndIndex
+        while (CurrentIndex != EndIndex)
+        {
+            DataPoint *Point = &DataBuffer->Buffer[CurrentIndex];
+            DataPoint *NextPoint = &DataBuffer->Buffer[NextIndex];
+
+            i32 PosX = (i32)roundf((CurrentIndex - StartIndex) * (1.0f * ScreenWidth / VIEW_WINDOW_SIZE));
+            i32 TempPosY = (i32)roundf(MapTemperatureToScreen(Point->TemperatureCelsius));
+            i32 HumidPosY = (i32)roundf(MapHumidityToScreen(Point->HumidityPercent));
+
+            i32 NextPosX = (i32)roundf((NextIndex - StartIndex) * (1.0f * ScreenWidth / VIEW_WINDOW_SIZE));
+            i32 NextTempPosY = (i32)roundf(MapTemperatureToScreen(NextPoint->TemperatureCelsius));
+            i32 NextHumidPosY = (i32)roundf(MapHumidityToScreen(NextPoint->HumidityPercent));
 
             // Draw temperature lines
-            i32 PrevPosX = (i32)roundf((EndIndex - PrevIndex) * (1.0f * ScreenWidth / VIEW_WINDOW_SIZE));
-            i32 PrevTempPosY = (i32)roundf(0.9f * ScreenHeight - MapTemperatureToScreen(PrevPoint->TemperatureCelsius));
-            DrawLine((i32)(PrevPosX * 0.8f + 0.1f * ScreenWidth), (i32)(0.9f * ScreenHeight - PrevTempPosY),
-                     (i32)(PosX * 0.8f + 0.1f * ScreenWidth), (i32)(0.9f * ScreenHeight - TempPosY), RED);
+            DrawLine((i32)(PosX * 0.8 + 0.1f * ScreenWidth), (i32)TempPosY,
+                     (i32)(NextPosX * 0.8 + 0.1f * ScreenWidth), (i32)NextTempPosY, RED);
 
             // Draw humidity lines
-            i32 PrevHumidPosY = (i32)roundf(0.9f * ScreenHeight - MapHumidityToScreen(PrevPoint->HumidityPercent));
-            DrawLine((i32)(PrevPosX * 0.8f + 0.1f * ScreenWidth), (i32)(0.9f * ScreenHeight - PrevHumidPosY),
-                     (i32)(PosX * 0.8f + 0.1f * ScreenWidth), (i32)(0.9f * ScreenHeight - HumidPosY), GREEN);
+            DrawLine((i32)(PosX * 0.8 + 0.1f * ScreenWidth), (i32)HumidPosY,
+                     (i32)(NextPosX * 0.8 + 0.1f * ScreenWidth), (i32)NextHumidPosY, GREEN);
+
+            // Move to the next data point
+            CurrentIndex = NextIndex;
+            NextIndex = (NextIndex + 1) % DataBuffer->Capacity;
         }
+
+        // Border
+        DrawRectangleLinesEx((Rectangle){64, (i32)MapHumidityToScreen(MAX_HUMIDITY) - 100, ScreenWidth, ScreenHeight}, 4.0f, VIOLET);
 
         EndMode2D();
 
         // Render UI elements
-        const char *ProgramVersion = "Skogsnet_v0.0.4";
+        const char *ProgramVersion = "Skogsnet_v0.2.0";
         DrawTextEx(MainFont, ProgramVersion, {10, 10}, 20, 2, DARKGRAY);
         DrawTextEx(MainFont, ProgramVersion, {12, 12}, 20, 2, ORANGE);
 
@@ -522,6 +539,7 @@ int main(int argc, char **argv)
     }
 
     MainCamera.zoom = 1.0f;
+    MainCamera.target = (Vector2){0.0f, -(ScreenHeight - 160)};
     MainFont = LoadFontEx("./raylib_frontend/fonts/Super Mario Bros. 2.ttf", 32, 0, 250);
 
     // Data Allocation
