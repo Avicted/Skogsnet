@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.11) # FetchContent is available in 3.11+
 
-project(Frontend VERSION 0.2.0 LANGUAGES CXX)
+project(Frontend VERSION 0.3.0 LANGUAGES CXX)
 
 if (POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)

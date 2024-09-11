@@ -1,19 +1,20 @@
 #pragma once
 
 // Standard C++ library headers
-#include <iostream>  // For input/output stream operations
-#include <memory>    // For smart pointers like std::unique_ptr and std::shared_ptr
-#include <ctime>     // For time manipulation (C-style time handling)
-#include <cstring>   // For C-style string manipulation (e.g., strcmp, strcpy)
-#include <time.h>    // For time functions and structures (similar to <ctime>)
-#include <string>    // For std::string and string manipulation
-#include <cmath>     // For common mathematical functions like sqrt, sin, cos
-#include <algorithm> // For standard algorithms like std::sort, std::find
-#include <fstream>   // For file input/output stream operations
-#include <random>    // For random number generation facilities
-#include <climits>   // For limits of integral types (e.g., INT_MAX)
-#include <sstream>   // For string stream classes (std::stringstream)
-#include <chrono>    // For high-precision time utilities
+#include <iostream>      // For input/output stream operations
+#include <memory>        // For smart pointers like std::unique_ptr and std::shared_ptr
+#include <ctime>         // For time manipulation (C-style time handling)
+#include <cstring>       // For C-style string manipulation (e.g., strcmp, strcpy)
+#include <time.h>        // For time functions and structures (similar to <ctime>)
+#include <string>        // For std::string and string manipulation
+#include <cmath>         // For common mathematical functions like sqrt, sin, cos
+#include <algorithm>     // For standard algorithms like std::sort, std::find
+#include <fstream>       // For file input/output stream operations
+#include <random>        // For random number generation facilities
+#include <climits>       // For limits of integral types (e.g., INT_MAX)
+#include <sstream>       // For string stream classes (std::stringstream)
+#include <chrono>        // For high-precision time utilities
+#include <unordered_map> // For unordered associative containers (hash tables)
 
 // POSIX headers (Portable Operating System Interface)
 #include <errno.h>    // For error handling (defines errno)

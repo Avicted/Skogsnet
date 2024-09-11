@@ -5,7 +5,7 @@
 CC = g++
 
 # define any compile-time flags
-CPPFLAGS = -O0 -g -Wall -std=c++11 -Wno-narrowing
+CPPFLAGS = -O0 -g -pg -Wall -std=c++11 -Wno-narrowing
 CPPFLAGS += -I/usr/include
 
 # define library paths in addition to /usr/lib
