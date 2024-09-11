@@ -592,6 +592,11 @@ GameRender(f32 DeltaTime)
     ClearBackground(BLACK);
     BeginMode2D(ScreenSpaceCamera);
 
+    Rectangle Border = (Rectangle){0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    // Draw a gradient background
+    DrawRectangleGradientV(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){0, 0, 0, 255}, (Color){20, 20, 60, 128});
+
     // Draw the grid lines for temperature and humidity
     for (i32 i = MIN_TEMP; i <= MAX_TEMP; ++i)
     {
@@ -673,7 +678,6 @@ GameRender(f32 DeltaTime)
     }
 
     // Border
-    Rectangle Border = (Rectangle){64, (i32)MapHumidityToScreen(MAX_HUMIDITY) - 100, SCREEN_WIDTH, SCREEN_HEIGHT};
     DrawRectangleLinesEx(Border, 4.0f, VIOLET);
 
     EndTextureMode();
@@ -698,22 +702,22 @@ GameRender(f32 DeltaTime)
 
     // Render UI elements
     {
-        const char *ProgramVersion = "Skogsnet_v0.3.0";
-        DrawTextEx(MainFont, ProgramVersion, {10, 10}, 20, 2, DARKGRAY);
-        DrawTextEx(MainFont, ProgramVersion, {12, 12}, 20, 2, ORANGE);
+        const char *ProgramVersion = "Skogsnet_v0.3.1";
+        DrawTextEx(MainFont, ProgramVersion, {10, 10}, 32, 2, DARKGRAY);
+        DrawTextEx(MainFont, ProgramVersion, {12, 12}, 32, 2, ORANGE);
 
         if (DataBuffer->Count > 0)
         {
-            DataPoint *DataPoint = GetLatestDataPoint(DataBuffer); // &DataBuffer->Buffer[(DataBuffer->Tail - 1 + DataBuffer->Capacity) % DataBuffer->Capacity];
+            DataPoint *dataPoint = GetLatestDataPoint(DataBuffer); // &DataBuffer->Buffer[(DataBuffer->Tail - 1 + DataBuffer->Capacity) % DataBuffer->Capacity];
             char TempText[256];
-            sprintf(TempText, "Temperature: %f°C", DataPoint->TemperatureCelsius);
-            DrawTextEx(MainFont, TempText, {10, 40}, 20, 2, DARKGRAY);
-            DrawTextEx(MainFont, TempText, {12, 42}, 20, 2, RED);
+            sprintf(TempText, "Temperature: %.3f°C", dataPoint->TemperatureCelsius); // Use "%.3f" to format the temperature with three decimal places
+            DrawTextEx(MainFont, TempText, {10, 50}, 32, 2, DARKGRAY);
+            DrawTextEx(MainFont, TempText, {12, 52}, 32, 2, RED);
 
             char HumidityText[256];
-            sprintf(HumidityText, "Humidity: %f", DataPoint->HumidityPercent);
-            DrawTextEx(MainFont, HumidityText, {10, 70}, 20, 2, DARKGRAY);
-            DrawTextEx(MainFont, HumidityText, {12, 72}, 20, 2, GREEN);
+            sprintf(HumidityText, "Humidity: %.3f", dataPoint->HumidityPercent);
+            DrawTextEx(MainFont, HumidityText, {10, 90}, 32, 2, DARKGRAY);
+            DrawTextEx(MainFont, HumidityText, {12, 92}, 32, 2, GREEN);
         }
 
         // DEBUG --
@@ -722,16 +726,16 @@ GameRender(f32 DeltaTime)
         // DrawRectangleLinesEx((Rectangle){0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}, 4, RED);
 
         // Render info text top right corner
-        DrawTextEx(MainFont, "Right click to move camera", {10, 100}, 12, 2, DARKGRAY);
-        DrawTextEx(MainFont, "Right click to move camera", (Vector2){12, 102}, 12, 2, PINK);
+        DrawTextEx(MainFont, "Right click to move", {10, 130}, 20, 2, DARKGRAY);
+        DrawTextEx(MainFont, "Right click to move", (Vector2){12, 132}, 20, 2, PINK);
 
-        DrawTextEx(MainFont, "Scroll to zoom", (Vector2){10, 120}, 12, 2, DARKGRAY);
-        DrawTextEx(MainFont, "Scroll to zoom", (Vector2){12, 122}, 12, 2, PINK);
+        DrawTextEx(MainFont, "Scroll to zoom", (Vector2){10, 150}, 20, 2, DARKGRAY);
+        DrawTextEx(MainFont, "Scroll to zoom", (Vector2){12, 152}, 20, 2, PINK);
 
         int fps = GetFPS();
         char fpsText[256];
         sprintf(fpsText, "FPS: %d", fps);
-        DrawTextEx(MainFont, fpsText, (Vector2){10, 140}, 12, 2, LIGHTGRAY);
+        DrawTextEx(MainFont, fpsText, (Vector2){10, GetScreenHeight() - 32}, 28, 2, LIGHTGRAY);
     }
 
     EndDrawing();
@@ -818,7 +822,8 @@ int main(int argc, char **argv)
     ScreenSpaceCamera.target = {0.0f, 0.0f}; // (Vector2){0.0f, -(ScreenHeight - 160)};
     ScreenSpaceCamera.offset = {0.0f, 0.0f};
 
-    MainFont = LoadFontEx("./raylib_frontend/fonts/Super Mario Bros. 2.ttf", 32, 0, 250);
+    // MainFont = LoadFontEx("./raylib_frontend/fonts/Super Mario Bros. 2.ttf", 32, 0, 250);
+    MainFont = LoadFontEx("./raylib_frontend/fonts/upheavtt.ttf", 32, 0, 250);
 
     // Data Allocation
     DataBuffer = CreateCircularBuffer(MAX_DATA_POINTS);
