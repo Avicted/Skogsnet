@@ -10,3 +10,6 @@ result.out
 *.o
 # output.dat
 output_old.dat
+
+
+gmon.out

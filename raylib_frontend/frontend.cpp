@@ -59,11 +59,11 @@ Renderer MainRenderer;
 
 // @Note(Victor): these are dynamically adjusted based on the file line count
 
-// Maximum data points 10k max,
-unsigned long long MAX_DATA_POINTS = 10000ULL;
+// Maximum data points 20k max,
+unsigned long long MAX_DATA_POINTS = 20000ULL;
 
-// Define view window size 10k max
-unsigned long long VIEW_WINDOW_SIZE = 10000ULL;
+// Define view window size 20k max
+unsigned long long VIEW_WINDOW_SIZE = 20000ULL;
 
 bool isLoadingData = false;
 
@@ -651,6 +651,11 @@ GameRender(f32 DeltaTime)
         i32 HumidPosY = (i32)roundf(MapHumidityToScreen(Point->HumidityPercent));
 
         i32 NextPosX = (i32)roundf((NextIndex - StartIndex) * (1.0f * SCREEN_WIDTH / VIEW_WINDOW_SIZE));
+        if (NextPosX < 0)
+        {
+            NextPosX = SCREEN_WIDTH;
+        }
+
         i32 NextTempPosY = (i32)roundf(MapTemperatureToScreen(NextPoint->TemperatureCelsius));
         i32 NextHumidPosY = (i32)roundf(MapHumidityToScreen(NextPoint->HumidityPercent));
 
