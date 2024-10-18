@@ -31,6 +31,18 @@ _How to install required dependencies._
 sudo pacman -S raylib nlohmann-json base-devel cmake 
 ```
 
+_Add the current user to the group of the USB device port:_
+```shell
+# Show the group
+ls -l /dev/ttyACM0
+crw-rw---- 1 root uucp 166, 0 Oct 18 21:41 /dev/ttyACM0
+
+# Add the current user to the group
+sudo usermod -aG uucp $(whoami)
+
+# Logout -> Login again
+```
+
 ## Running
 
 _How to start both programs._
