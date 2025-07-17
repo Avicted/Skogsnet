@@ -2,6 +2,13 @@
 
 _Temperature and Humidity monitoring._
 
+# New version of Skogsnet
+This project has been deprecated in favor of the new version, which is a complete rewrite in Go with a more modern architecture and better performance.
+
+For the latest version, please visit:
+[Skogsnet V2](https://github.com/Avicted/skogsnet_v2)
+
+
 <br>
 
 ## Concept
